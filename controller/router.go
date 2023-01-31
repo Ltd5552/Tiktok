@@ -1,13 +1,13 @@
 package main
 
 import (
-	"Tiktok/api/handlers"
+	"Tiktok/controller/handlers"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func main() {
+func InitRouter() {
 
 	r := gin.New()
 
