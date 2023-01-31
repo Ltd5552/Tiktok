@@ -1,4 +1,4 @@
-module Tiktok
+module github.com/Ltd5552/Tiktok
 
 go 1.19
 
