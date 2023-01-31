@@ -48,6 +48,6 @@ func InitRouter() {
 	// 为什么使用原生的http而不直接r.Run()?
 	err := http.ListenAndServe(":8088", r)
 	if err != nil {
-		fmt.Println("log...")
+		fmt.Println("log..")
 	}
 }
