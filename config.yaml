@@ -1,0 +1,3 @@
+server:
+  name: Tiktok
+  port: 8088
