@@ -2,7 +2,10 @@ module Tiktok
 
 go 1.19
 
-require github.com/gin-gonic/gin v1.8.1
+require (
+	github.com/gin-gonic/gin v1.8.1
+	github.com/golang-jwt/jwt/v4 v4.4.3
+)
 
 require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
