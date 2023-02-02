@@ -13,8 +13,12 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+// 设置secret
 var MySecret = []byte("密令123")
 
+// 创建token
+// 传入参数id，name(数据库ID、name)
+// 返回参数token和错误信息
 func CreateToken(id string, name string) (string, error) {
 	claim := Claims{
 		ID:               id,
@@ -31,6 +35,9 @@ func Secret() jwt.Keyfunc {
 	}
 }
 
+// 解析token
+// 传入参数token
+// 返回数据库id和错误信息
 func ParseToken(tokenstr string) (int, error) {
 	token, err := jwt.ParseWithClaims(tokenstr, &Claims{}, Secret())
 	if err != nil {
