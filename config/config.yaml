@@ -13,3 +13,5 @@ jaeger:
   host: 127.0.0.1
   port: 12137
   path: trace
+
+test:
