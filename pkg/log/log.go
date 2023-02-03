@@ -195,12 +195,6 @@ type Logger struct {
 
 var std = New(os.Stderr, InfoLevel)
 
-var fileName = "gin.log"
-
-func Set(filename string) {
-	fileName = filename + ".log"
-}
-
 // 获取traceID和spanID
 func getID(c *gin.Context) (string, string) {
 	var traceID string

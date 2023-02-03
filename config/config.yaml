@@ -1,0 +1,15 @@
+server:
+  name: Tiktok
+  port: 8088
+
+database:
+  host:     1.15.78.83
+  port:     9887
+  name:     Tiktok
+  user:     root
+  password: 12137
+
+jaeger:
+  host: 127.0.0.1
+  port: 12137
+  path: trace

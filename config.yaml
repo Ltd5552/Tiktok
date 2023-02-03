@@ -1,6 +1,0 @@
-server:
-  name: Tiktok
-  port: 8088
-
-jaeger:
-  port: 12137

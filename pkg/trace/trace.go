@@ -1,8 +1,10 @@
 package trace
 
 import (
+	"Tiktok/config"
 	"Tiktok/pkg/log"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	"go.opentelemetry.io/otel"
@@ -15,7 +17,11 @@ import (
 // initTracer 初始化一个全局的TracerProvider，traceID将在log中打印出来，添加jaeger作为可观测性后端
 func initTracer() *sdktrace.TracerProvider {
 	// Create the Jaeger exporter
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:12137/traces")))
+	endpoint := fmt.Sprintf("http://%v:%v/%v",
+		config.JaegerSetting.Host,
+		config.JaegerSetting.Port,
+		config.JaegerSetting.Path)
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(endpoint)))
 	if err != nil {
 		log.Error("jaeger init failed", zap.Error(err))
 	}
@@ -37,5 +43,5 @@ func Set(r *gin.Engine) {
 		}
 	}()
 	// 使用open-telemetry官方中间件
-	r.Use(otelgin.Middleware("Tiktok"))
+	r.Use(otelgin.Middleware(config.ServerSetting.Name))
 }

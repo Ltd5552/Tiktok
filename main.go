@@ -1,11 +1,17 @@
 package main
 
 import (
+	"Tiktok/config"
 	"Tiktok/controller"
 	"Tiktok/pkg/log"
+	"fmt"
 	"go.uber.org/zap"
 	"net/http"
 )
+
+func init() {
+	config.InitViper()
+}
 
 func main() {
 	defer func() {
@@ -16,12 +22,11 @@ func main() {
 	}()
 
 	s := &http.Server{
-		//Addr:           fmt.Sprintf(":%d", config.ServerSetting.Port),
-		Handler: controller.InitRouter(),
-		//ReadTimeout:    config.ServerSetting.ReadTimeout,
-		//WriteTimeout:   config.ServerSetting.WriteTimeout,
+		Addr:           fmt.Sprintf(":%d", config.ServerSetting.Port),
+		Handler:        controller.InitRouter(),
 		MaxHeaderBytes: 1 << 20,
 	}
+
 	err := s.ListenAndServe()
 	if err != nil {
 		log.Error("ListenAndServe err", zap.Error(err))
