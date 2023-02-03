@@ -1,15 +1,21 @@
-package main
+package controller
 
 import (
 	"Tiktok/controller/handlers"
-	"fmt"
+	"Tiktok/pkg/metric"
+	"Tiktok/pkg/trace"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
-func InitRouter() {
+func InitRouter() *gin.Engine {
 
 	r := gin.New()
+
+	// 初始化trace
+	trace.Set(r)
+
+	// 初始化metric
+	metric.Set(r)
 
 	// 创建路由组
 	douyin := r.Group("/douyin")
@@ -45,9 +51,5 @@ func InitRouter() {
 	relation.GET("/follow/list", handlers.GetRelationFollowList)
 	relation.GET("/follower/list", handlers.GetRelationFollowerList)
 
-	// 为什么使用原生的http而不直接r.Run()?
-	err := http.ListenAndServe(":8088", r)
-	if err != nil {
-		fmt.Println("log...")
-	}
+	return r
 }
