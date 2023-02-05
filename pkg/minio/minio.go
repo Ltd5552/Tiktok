@@ -1,8 +1,8 @@
 package minio
 
 import (
+	"Tiktok/pkg/log"
 	"context"
-	"fmt"
 	"net/url"
 	"time"
 
@@ -24,16 +24,16 @@ func init(){
 		Secure: useSSL,
 	})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(err.Error())
 	}
 	found, err := DetectExist(context.Background(), "vedio")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(err.Error())
 	}
 	if !found{
 		err = CreateBucket("vedio")
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Error(err.Error())
 		}
 	}
 }
@@ -46,7 +46,8 @@ func CreateBucket(bucketName string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Create bucket %s successful", bucketName)
+	s := "Create bucket " + bucketName + " successful"
+	log.Error(s)
 	return nil
 }
 
@@ -66,22 +67,21 @@ func UploadFile(bucketName string, path string, objectName string, contentType s
 	ctx := context.Background()
 	found, err := client.BucketExists(ctx, bucketName)
 	if err != nil{
-		fmt.Println(err.Error())
+		log.Error(err.Error())
 		return err
 	}
 	if !found{
 		err = CreateBucket(bucketName)
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Error(err.Error())
 			return err
 		}
 	}
-	info, err := client.FPutObject(ctx, bucketName, objectName, path, minio.PutObjectOptions{ContentType: contentType})
+	_, err = client.FPutObject(ctx, bucketName, objectName, path, minio.PutObjectOptions{ContentType: contentType})
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Error(err.Error())
 		return err
 	}
-	fmt.Println(info.Size)
 	return nil
 }
 
@@ -92,7 +92,7 @@ func GetFile(bucketName string, objectName string) (*url.URL, error){
 	reqParams := make(url.Values)
 	presignedUrl, err := client.PresignedGetObject(ctx, bucketName, objectName, time.Hour, reqParams)
 	if err !=nil {
-		fmt.Println(err.Error())
+		log.Error(err.Error())
 		return nil, err
 	}
 	return presignedUrl, nil
