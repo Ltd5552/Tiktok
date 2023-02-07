@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Server 添加yaml字段便于后面直接从yaml类型的配置文件中关联绑定
 type Server struct {
 	Name string `yaml:"name"`
 	Port int    `yaml:"port"`
@@ -26,9 +27,15 @@ type Jaeger struct {
 	Path string `yaml:"path"`
 }
 
+type Auth struct {
+	Md5Salt   string `yaml:"md5Salt"`
+	JwtSecret string `yaml:"jwtSecret"`
+}
+
 var ServerSetting = &Server{}
 var DatabaseSetting = &Database{}
 var JaegerSetting = &Jaeger{}
+var AuthSetting = &Auth{}
 
 func InitViper() {
 	viper.SetConfigName("config")
@@ -39,8 +46,8 @@ func InitViper() {
 		fmt.Println(err)
 		log.Error("Read config file err", zap.Error(err))
 	}
-	log.Info("Config init success")
 
+	//获取viper的子结构（子树），否则字段差了一个层级没法绑定
 	server := viper.Sub("server")
 	if err = server.Unmarshal(&ServerSetting); err != nil {
 		log.Error("Config load err", zap.Error(err))
@@ -55,4 +62,10 @@ func InitViper() {
 	if err = jaeger.Unmarshal(&JaegerSetting); err != nil {
 		log.Error("Config load err", zap.Error(err))
 	}
+
+	auth := viper.Sub("auth")
+	if err = auth.Unmarshal(&AuthSetting); err != nil {
+		log.Error("Config load err", zap.Error(err))
+	}
+	log.Info("Config init success")
 }
