@@ -3,7 +3,7 @@ server:
   port: 8088
 
 database:
-  host:     1.15.78.83
+  host:     127.0.0.1
   port:     9887
   name:     Tiktok
   user:     root
@@ -14,4 +14,7 @@ jaeger:
   port: 12137
   path: trace
 
-test:
+
+auth:
+  md5Salt: PJzxlk8RcBwwDAtVupPf
+  jwtSecret:
