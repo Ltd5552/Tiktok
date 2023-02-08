@@ -8,6 +8,8 @@ database:
   name:     Tiktok
   user:     root
   password: 12137
+  maxOpen:  200
+  maxConn:  200
 
 jaeger:
   host: 127.0.0.1

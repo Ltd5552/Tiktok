@@ -5,7 +5,7 @@ import (
 	oteltrace "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	//"gopkg.in/natefinch/lumberjack.v2"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"os"
 	"time"
@@ -216,19 +216,19 @@ func New(writer io.Writer, level Level) *Logger {
 		panic("the writer is nil")
 	}
 
-	//// 自定义日志文件写入格式
-	//opts := []zapcore.WriteSyncer{
-	//	zapcore.AddSync(&lumberjack.Logger{
-	//		Filename:   fileName,
-	//		MaxSize:    1024,
-	//		MaxBackups: 20,
-	//		MaxAge:     28,
-	//		Compress:   true,
-	//	}),
-	//}
-	//opts = append(opts, zapcore.AddSync(os.Stdout))
-	//syncWriter := zapcore.NewMultiWriteSyncer(opts...)
-	syncWriter := zapcore.NewMultiWriteSyncer()
+	// 自定义日志文件写入格式
+	opts := []zapcore.WriteSyncer{
+		zapcore.AddSync(&lumberjack.Logger{
+			Filename:   "Tiktok.log",
+			MaxSize:    1024,
+			MaxBackups: 20,
+			MaxAge:     28,
+			Compress:   true,
+		}),
+	}
+	opts = append(opts, zapcore.AddSync(os.Stdout))
+	syncWriter := zapcore.NewMultiWriteSyncer(opts...)
+	//syncWriter := zapcore.NewMultiWriteSyncer()
 
 	// 自定义时间输出格式
 	loc, _ := time.LoadLocation(timeLoc)
