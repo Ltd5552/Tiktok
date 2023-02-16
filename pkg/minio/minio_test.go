@@ -6,7 +6,7 @@ import (
 )
 
 func TestMinioUp(t *testing.T) {
-	err := UploadFile("vedio", "D:/青训营/Tiktok/test.png", "test", "application/png")
+	err := UploadFile("vedio", "../../img/test.png", "test", "application/png")
 	if err != nil{
 		t.Errorf(err.Error())
 	}
