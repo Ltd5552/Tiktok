@@ -26,6 +26,7 @@ type favorite struct{
 	Video_id int64 `gorm:"column:vidoe_id"`
 }
 
+// 判断用户是否给该视频点赞
 func JudgeFavorite(user_id int64, video_id int64) bool{
 	var tmp favorite
 	if err := DB.Where("user_id = ?", user_id).Where("video_id = ?", video_id).Find(&tmp).Error; err == gorm.ErrRecordNotFound {
@@ -37,28 +38,31 @@ func JudgeFavorite(user_id int64, video_id int64) bool{
 	return true
 }
 
+// 将video数据从数据库结构体转成response结构体
 func VideosConv(id int64, videos []video) ([]common.Video, int64){
-	var convVedios []common.Video
+	var convVideos []common.Video
 	var lastestTime int64
 	for _, video := range(videos){
-		var convVedio common.Video
-		convVedio.Id = video.Id
-		convVedio.Author = GetUser(video.Author_id)
-		convVedio.PlayUrl = video.Play_url
-		convVedio.CoverUrl = video.Cover_url
-		convVedio.CommentCount = video.Comment_count
+		var convVideo common.Video
+		convVideo.Id = video.Id
+		convVideo.Author = GetUser(video.Author_id)
+		convVideo.PlayUrl = video.Play_url
+		convVideo.CoverUrl = video.Cover_url
+		convVideo.CommentCount = video.Comment_count
 		if id == -1{
-			convVedio.IsFavorite = false
+			convVideo.IsFavorite = false
 		} else{
-			convVedio.IsFavorite = JudgeFavorite(id, video.Id)
+			convVideo.IsFavorite = JudgeFavorite(id, video.Id)
 		}
-		convVedios = append(convVedios, convVedio)
+		convVideos = append(convVideos, convVideo)
+		// 记录创建最晚时间
 		lastestTime = video.Create_at.Unix()
 	}
-	return convVedios, lastestTime
+	return convVideos, lastestTime
 }
 
-func GetVedio(id int64, lastestTime int) ([]common.Video, int64){
+// 从数据库中获取video信息
+func GetVideo(id int64, lastestTime int) ([]common.Video, int64){
 	var videos []video
 	if lastestTime !=0 {
 		time := time.Unix(int64(lastestTime), 0)
