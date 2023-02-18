@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"Tiktok/config"
-	"Tiktok/controller/common"
+	"Tiktok/controller"
 	"Tiktok/pkg/hash"
 	"Tiktok/pkg/log"
 	"Tiktok/service"
@@ -12,14 +12,14 @@ import (
 )
 
 type UserLoginResponse struct {
-	common.Response
+	controller.Response
 	UserId int64  `json:"user_id,omitempty"`
 	Token  string `json:"token"`
 }
 
 type UserResponse struct {
-	common.Response
-	common.User `json:"user"`
+	controller.Response
+	controller.User `json:"user"`
 }
 
 func UserRegister(c *gin.Context) {
@@ -31,17 +31,17 @@ func UserRegister(c *gin.Context) {
 		log.Infos(c, "Account validate failed")
 		// 这部分参考示例实现
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: common.Response{
+			Response: controller.Response{
 				StatusCode: 1,
 				StatusMsg:  "Account validate failed"}})
 		return
 	}
 
 	// 唯一性校验
-	if exist := service.Exist(username); exist {
+	if exist := user.Exist(username); exist {
 		log.Infos(c, "User already exist")
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: common.Response{
+			Response: controller.Response{
 				StatusCode: 1,
 				StatusMsg:  "User already exist"}})
 		return
@@ -54,16 +54,16 @@ func UserRegister(c *gin.Context) {
 	}
 
 	// 待添加token
-	if userID, ok := service.Register(account); ok {
+	if userID, ok := user.Register(account); ok {
 		log.Infos(c, "User register success")
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: common.Response{StatusCode: 0, StatusMsg: "User already exist"},
+			Response: controller.Response{StatusCode: 0, StatusMsg: "User already exist"},
 			UserId:   userID,
 			Token:    "token"})
 	} else {
 		log.Infos(c, "User register err")
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: common.Response{
+			Response: controller.Response{
 				StatusCode: 1,
 				StatusMsg:  "User register err"}})
 		return
@@ -79,7 +79,7 @@ func UserLogin(c *gin.Context) {
 	if !ValidateAccount(username, password) {
 		log.Infos(c, "Account validate failed")
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: common.Response{StatusCode: 1, StatusMsg: "Account validate failed"}})
+			Response: controller.Response{StatusCode: 1, StatusMsg: "Account validate failed"}})
 		return
 	}
 
@@ -88,16 +88,16 @@ func UserLogin(c *gin.Context) {
 		"password": hash.Md5WithSalt(password, config.AuthSetting.Md5Salt),
 	}
 
-	if id, exist := service.Login(account); exist {
+	if id, exist := user.Login(account); exist {
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: common.Response{StatusCode: 0},
+			Response: controller.Response{StatusCode: 0},
 			UserId:   id,
 			Token:    "token",
 		})
 	} else {
 		log.Infos(c, "User doesn't exist")
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: common.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response: controller.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	}
 }
@@ -108,15 +108,15 @@ func GetUserInfo(c *gin.Context) {
 
 	userID := c.Query("user_id")
 
-	if User, exist := service.Info(userID); exist {
+	if User, exist := user.Info(userID); exist {
 		c.JSON(http.StatusOK, UserResponse{
-			Response: common.Response{StatusCode: 0},
+			Response: controller.Response{StatusCode: 0},
 			User:     User,
 		})
 	} else {
 		log.Infos(c, "User doesn't exist")
 		c.JSON(http.StatusOK, UserResponse{
-			Response: common.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response: controller.Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 	}
 }

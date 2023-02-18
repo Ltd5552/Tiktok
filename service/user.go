@@ -1,9 +1,9 @@
-package service
+package user
 
-import "Tiktok/controller/common"
+import "Tiktok/controller"
 
-func Info(userID string) (common.User, bool) {
-	return common.User{}, true
+func Info(userID string) (controller.User, bool) {
+	return controller.User{}, true
 }
 
 func Register(map[string]interface{}) (int64, bool) {

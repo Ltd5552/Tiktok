@@ -1,4 +1,4 @@
-package common
+package controller
 
 // Response 请求响应的复用
 type Response struct {
