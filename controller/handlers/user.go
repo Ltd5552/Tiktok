@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"Tiktok/config"
+	"Tiktok/model"
 	"Tiktok/pkg/hash"
 	"Tiktok/pkg/log"
-	"Tiktok/service"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -37,15 +37,15 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
-	// 唯一性校验
-	if exist := user.Exist(username); exist {
-		log.Infos(c, "User already exist")
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{
-				StatusCode: 1,
-				StatusMsg:  "User already exist"}})
-		return
-	}
+	//// 唯一性校验
+	//if exist := user.Exist(username); exist {
+	//	log.Infos(c, "User already exist")
+	//	c.JSON(http.StatusOK, UserLoginResponse{
+	//		Response: Response{
+	//			StatusCode: 1,
+	//			StatusMsg:  "User already exist"}})
+	//	return
+	//}
 
 	// 创建account
 	account := map[string]interface{}{
@@ -54,7 +54,7 @@ func UserRegister(c *gin.Context) {
 	}
 
 	// 待添加token
-	if userID, err := user.Register(account); err == nil {
+	if userID, err := model.CreateUser(account); err == nil {
 		log.Infos(c, "User register success")
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0, StatusMsg: "User already exist"},
@@ -88,7 +88,7 @@ func UserLogin(c *gin.Context) {
 		"password": hash.Md5WithSalt(password, config.AuthSetting.Md5Salt),
 	}
 
-	if id, exist := user.Login(account); exist {
+	if id, err := model.CreateUser(account); err == nil {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
 			UserId:   id,
@@ -109,10 +109,14 @@ func GetUserInfo(c *gin.Context) {
 
 	userID := c.Query("user_id")
 
-	if User, exist := user.Info(userID); exist {
+	if ModelUser, err := model.ReadUser(userID); err == nil {
+
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{StatusCode: 0},
-			User:     User,
+			User: User{
+				Name: ModelUser.Name,
+				Id:   ModelUser.ID,
+			},
 		})
 	} else {
 		log.Infos(c, "User doesn't exist")

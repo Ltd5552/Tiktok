@@ -17,6 +17,7 @@ func InitRouter() *gin.Engine {
 	// 初始化metric
 	metric.Set(r)
 
+	r.Use()
 	// 创建路由组
 	douyin := r.Group("/douyin")
 
