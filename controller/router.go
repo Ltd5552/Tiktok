@@ -2,8 +2,10 @@ package controller
 
 import (
 	"Tiktok/controller/handlers"
+	"Tiktok/pkg/jwt"
 	"Tiktok/pkg/metric"
 	"Tiktok/pkg/trace"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,6 +25,7 @@ func InitRouter() *gin.Engine {
 
 	// feed组，视频流
 	feed := douyin.Group("/feed")
+	feed.Use(jwt.VerfyMiddleware())
 	feed.GET("/", handlers.GetFeed)
 
 	// user组，用户
