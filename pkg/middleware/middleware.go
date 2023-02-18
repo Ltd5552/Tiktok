@@ -10,16 +10,11 @@ import (
 func VerfyMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Query("token")
-		if token == "" {
-			ctx.Set("Login", false)
-			ctx.Next()
-		}
 		id, err := jwt.ParseToken(token)
 		if err !=nil {
 			ctx.Abort()
 		}
 		ctx.Set("ID", id)
-		ctx.Set("Login", true)
 		ctx.Next()
 	}
 }
