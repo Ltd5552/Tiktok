@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"Tiktok/config"
 	"Tiktok/pkg/log"
 	"errors"
 	"strconv"
@@ -16,7 +17,7 @@ type Claims struct {
 }
 
 // 设置secret
-var MySecret = []byte("密令123")
+var MySecret = []byte(config.AuthSetting.JwtSecret)
 
 // 创建token
 // 传入参数id，name(数据库ID、name)
