@@ -4,11 +4,14 @@ import (
 	"Tiktok/config"
 	"Tiktok/model"
 	"Tiktok/pkg/hash"
+	"Tiktok/pkg/jwt"
 	"Tiktok/pkg/log"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"net/http"
 	"regexp"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type UserLoginResponse struct {
@@ -56,10 +59,14 @@ func UserRegister(c *gin.Context) {
 	// 待添加token
 	if userID, err := model.CreateUser(account); err == nil {
 		log.Infos(c, "User register success")
+		token, err := jwt.CreateToken(strconv.Itoa(int(userID)), username)
+		if err != nil {
+			log.Error("Create token error", zap.Error(err))
+		}
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0, StatusMsg: "User already exist"},
 			UserId:   userID,
-			Token:    "token"})
+			Token:    token})
 	} else {
 		log.Infos(c, "User register err", zap.Error(err))
 		c.JSON(http.StatusOK, UserLoginResponse{
