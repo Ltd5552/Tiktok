@@ -19,6 +19,8 @@ type Database struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`
 	Name     string `yaml:"name"`
+	MaxConn  int    `yaml:"maxConn"`
+	MaxOpen  int    `yaml:"maxOpen"`
 }
 
 type Jaeger struct {
