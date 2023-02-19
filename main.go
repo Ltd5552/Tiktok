@@ -3,6 +3,7 @@ package main
 import (
 	"Tiktok/config"
 	"Tiktok/controller"
+	"Tiktok/model"
 	"Tiktok/pkg/log"
 	"fmt"
 	"go.uber.org/zap"
@@ -11,6 +12,7 @@ import (
 
 func init() {
 	config.InitViper()
+	model.InitDB()
 }
 
 func main() {

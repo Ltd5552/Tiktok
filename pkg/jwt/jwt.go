@@ -48,7 +48,7 @@ func ParseToken(tokenstr string) (int, error) {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 				log.Error("not a true token")
 				return 0, errors.New("not a true token")
-			} else{
+			} else {
 				log.Error("token error")
 				return 0, errors.New("token error")
 			}
@@ -57,7 +57,7 @@ func ParseToken(tokenstr string) (int, error) {
 	claims, ok := token.Claims.(*Claims)
 	if ok && token.Valid {
 		id, err := strconv.Atoi(claims.ID)
-		if err!=nil {
+		if err != nil {
 			return 0, errors.New("ID is not int")
 		}
 		return id, nil
@@ -66,11 +66,11 @@ func ParseToken(tokenstr string) (int, error) {
 	return 0, errors.New("couldn`t parse the token")
 }
 
-func VerfyMiddleware() gin.HandlerFunc {
+func VerifyMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Query("token")
 		id, err := ParseToken(token)
-		if err !=nil {
+		if err != nil {
 			ctx.Abort()
 		}
 		ctx.Set("ID", id)
