@@ -13,15 +13,15 @@ var DB *gorm.DB
 var err error
 
 func InitDB() {
-
-	DB, err = gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 		config.DatabaseSetting.User,
 		config.DatabaseSetting.Password,
 		config.DatabaseSetting.Host,
 		config.DatabaseSetting.Port,
-		config.DatabaseSetting.Name)))
+		config.DatabaseSetting.Name)
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("fatal error connecting to the database: ", log.String("err", err.Error()))
+		log.Fatal("fatal error connecting to the database: ", zap.Error(err))
 	}
 
 	sqlDB, err := DB.DB()

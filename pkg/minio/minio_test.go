@@ -13,8 +13,8 @@ func TestMinioUp(t *testing.T) {
 }
 
 func TestMinioGet(t *testing.T) {
-	url, err := GetFile("vedio", "test")
-	if err !=nil {
+	url, err := GetFile("video", "test")
+	if err != nil {
 		t.Errorf(err.Error())
 	}
 	fmt.Println(url.String())
