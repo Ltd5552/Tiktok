@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -63,4 +64,16 @@ func ParseToken(tokenstr string) (int, error) {
 	}
 	log.Error("token parse error")
 	return 0, errors.New("couldn`t parse the token")
+}
+
+func VerfyMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		token := ctx.Query("token")
+		id, err := ParseToken(token)
+		if err !=nil {
+			ctx.Abort()
+		}
+		ctx.Set("ID", id)
+		ctx.Next()
+	}
 }
