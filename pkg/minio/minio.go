@@ -1,6 +1,7 @@
 package minio
 
 import (
+	"Tiktok/config"
 	"Tiktok/pkg/log"
 	"context"
 	"net/url"
@@ -14,9 +15,9 @@ var client *minio.Client
 
 // 初始化，与minio服务端建立连接
 func init(){
-	endpoint := "127.0.0.1:9000"
-	accessKeyID := "admin"
-	secretAccessKey := "1766551219.qwe."
+	endpoint := config.MinioSetting.Host + ":" + config.MinioSetting.Port
+	accessKeyID := config.MinioSetting.AccessKeyID
+	secretAccessKey := config.MinioSetting.SecretAccessKey
 	useSSL := false
 	var err error
 	client, err = minio.New(endpoint, &minio.Options{
@@ -29,6 +30,8 @@ func init(){
 	found, err := DetectExist(context.Background(), "vedio")
 	if err != nil {
 		log.Error(err.Error())
+	} else{
+		log.Info("init minio success")
 	}
 	if !found{
 		err = CreateBucket("vedio")
