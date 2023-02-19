@@ -3,6 +3,7 @@ package config
 import (
 	"Tiktok/pkg/log"
 	"fmt"
+
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -29,6 +30,13 @@ type Jaeger struct {
 	Path string `yaml:"path"`
 }
 
+type Minio struct {
+	Host            string `yaml:"host"`
+	Port            string `yaml:"port"`
+	AccessKeyID     string `yaml:"accessKeyID"`
+	SecretAccessKey string `yaml:"secretAccessKey"`
+}
+
 type Auth struct {
 	Md5Salt   string `yaml:"md5Salt"`
 	JwtSecret string `yaml:"jwtSecret"`
@@ -38,6 +46,7 @@ var ServerSetting = &Server{}
 var DatabaseSetting = &Database{}
 var JaegerSetting = &Jaeger{}
 var AuthSetting = &Auth{}
+var MinioSetting = &Minio{}
 
 func InitViper() {
 	viper.SetConfigName("config")
@@ -67,6 +76,11 @@ func InitViper() {
 
 	auth := viper.Sub("auth")
 	if err = auth.Unmarshal(&AuthSetting); err != nil {
+		log.Error("Config load err", zap.Error(err))
+	}
+
+	minio := viper.Sub("minio")
+	if err = minio.Unmarshal(&MinioSetting); err != nil {
 		log.Error("Config load err", zap.Error(err))
 	}
 	log.Info("Config init success")

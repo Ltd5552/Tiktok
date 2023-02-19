@@ -4,6 +4,7 @@ import (
 	"Tiktok/pkg/log"
 	"time"
 
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -35,21 +36,22 @@ func JudgeFavorite(userId uint, videoId uint) bool {
 }
 
 // 从数据库中获取video信息
-func GetVideo(id uint, lastestTime int) []Video {
+
+func GetVideo(id uint, lastestTime int) ([]Video, error){
 	var videos []Video
 	if lastestTime != 0 {
 		time := time.Unix(int64(lastestTime), 0)
 		err := DB.Where("create_at < ?", time).Order("create_at desc").Limit(30).Find(&videos).Error
-		if err != nil {
-			log.Error("select sql failed")
-			return nil
+		if err != nil{
+			log.Error("select sql failed", zap.Error(err))
+			return nil, err
 		}
-		return videos
+		return videos, nil
 	}
 	err := DB.Order("create_at desc").Limit(30).Find(&videos).Error
-	if err != nil {
-		log.Error("select sql failed")
-		return nil
+	if err != nil{
+		log.Error("select sql failed", zap.Error(err))
+		return nil, err
 	}
-	return videos
+	return videos, nil
 }

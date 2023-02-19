@@ -16,7 +16,12 @@ jaeger:
   port: 12137
   path: trace
 
+minio:
+  host: 127.0.0.1
+  port: 9000
+  accessKeyID: admin
+  secretAccessKey: 1766551219.qwe.
 
 auth:
   md5Salt: PJzxlk8RcBwwDAtVupPf
-  jwtSecret:
+  jwtSecret: 密令123

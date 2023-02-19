@@ -73,10 +73,15 @@ func GetFeed(c *gin.Context) {
 			id = 0
 		}
 	}
-	model_video_list := model.GetVideo(id, time)
+	model_video_list, err := model.GetVideo(id, time)
+	if err != nil {
+		c.JSON(http.StatusOK, FeedResponse{
+			Response: Response{StatusCode: 1, StatusMsg: err.Error()},
+		})
+	}
 	video_list, new_time := VideosConv(id, model_video_list)
 	c.JSON(http.StatusOK, FeedResponse{
-		Response:   Response{StatusCode: 1},
+		Response: Response{StatusCode: 0},
 		Video_list: video_list,
 		Next_time:  new_time,
 	})
