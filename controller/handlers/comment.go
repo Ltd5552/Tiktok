@@ -15,6 +15,11 @@ type CommentResponse struct{
 	Comment Comment
 }
 
+type CommentListResponse struct{
+	Response
+	Comment []Comment
+}
+
 func CommentConv(comment model.Comment) (Comment, error){
 	var new_comment Comment
 	new_comment.Id = comment.Model.ID
@@ -112,5 +117,47 @@ func CommentAction(c *gin.Context) {
 }
 
 func GetCommentList(c *gin.Context) {
-
+	video_id := c.Query("vedio_id")
+	login, _ := c.Get("Login")
+	if login == false {
+		c.JSON(http.StatusOK, CommentListResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg: "get comment need login first",
+			},
+		})
+		return
+	} else {
+		tmp, _ := c.Get("ID")
+		var ok bool
+		if _, ok = tmp.(uint); !ok{
+			log.Error("id to int error")
+			c.JSON(http.StatusOK, CommentResponse{
+				Response: Response{StatusCode: 1, StatusMsg: "id to int error"},
+			})
+			return
+		} 
+	}
+	comment_list, err := model.GetComment(video_id)
+	if err != nil{
+		log.Error("Get comment_list error", zap.Error(err))
+		c.JSON(http.StatusOK, CommentListResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "Get comment_list error"},
+		})
+	}
+	var comments []Comment
+	for _, comment := range(comment_list){
+		new_comment, err := CommentConv(comment)
+		if err !=nil {
+			c.JSON(http.StatusOK, CommentListResponse{
+				Response: Response{StatusCode: 1, StatusMsg: err.Error()},
+			})
+			return
+		}
+		comments = append(comments, new_comment)
+	}
+	c.JSON(http.StatusOK, CommentListResponse{
+		Response: Response{StatusCode: 0},
+		Comment: comments,
+	})
 }
