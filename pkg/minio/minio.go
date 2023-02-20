@@ -3,6 +3,7 @@ package minio
 import (
 	"Tiktok/config"
 	"Tiktok/pkg/log"
+	"bytes"
 	"context"
 	"net/url"
 	"time"
@@ -27,30 +28,22 @@ func init(){
 	if err != nil {
 		log.Error(err.Error())
 	}
-	found, err := DetectExist(context.Background(), "vedio")
 	if err != nil {
 		log.Error(err.Error())
 	} else{
 		log.Info("init minio success")
 	}
-	if !found{
-		err = CreateBucket("vedio")
-		if err != nil {
-			log.Error(err.Error())
-		}
-	}
 }
 
 // 创建桶，返回错误信息
-func CreateBucket(bucketName string) error {
-	ctx := context.Background()
+func CreateBucket(ctx context.Context, bucketName string) error {
 	location := "cn-north-1"
-	err := client.MakeBucket(ctx, "vedio", minio.MakeBucketOptions{Region: location})
+	err := client.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{Region: location})
 	if err != nil {
 		return err
 	}
 	s := "Create bucket " + bucketName + " successful"
-	log.Error(s)
+	log.Info(s)
 	return nil
 }
 
@@ -65,22 +58,24 @@ func DetectExist(ctx context.Context, bucketName string) (bool, error){
 }
 
 // 上传文件
-// 传入参数：桶名、文件路径、存储的名字、文件类型，返回错误信息
-func UploadFile(bucketName string, path string, objectName string, contentType string) error {
+// 传入参数：桶名、文件路径、存储的名字、文件类型(video, cover)，返回错误信息
+// 永久访问的url为127.0.0.1:9000/video/objectName , 封面把video换成cover
+func UploadFile(bucketName string, data []byte, objectName string, contentType string) error {
 	ctx := context.Background()
+	reader := bytes.NewReader(data)
 	found, err := client.BucketExists(ctx, bucketName)
 	if err != nil{
 		log.Error(err.Error())
 		return err
 	}
 	if !found{
-		err = CreateBucket(bucketName)
+		err = CreateBucket(ctx, bucketName)
 		if err != nil {
 			log.Error(err.Error())
 			return err
 		}
 	}
-	_, err = client.FPutObject(ctx, bucketName, objectName, path, minio.PutObjectOptions{ContentType: contentType})
+	_, err = client.PutObject(ctx, bucketName, objectName, reader, int64(len(data)), minio.PutObjectOptions{ContentType: contentType})
 	if err != nil {
 		log.Error(err.Error())
 		return err

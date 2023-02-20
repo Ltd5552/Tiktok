@@ -45,6 +45,7 @@ func InitRouter() *gin.Engine {
 
 	// comment组，评论
 	comment := douyin.Group("/comment")
+	comment.Use(jwt.VerifyMiddleware())
 	comment.POST("/action", handlers.CommentAction)
 	comment.GET("/list", handlers.GetCommentList)
 
