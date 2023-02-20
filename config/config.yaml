@@ -7,7 +7,7 @@ database:
   port:     9887
   name:     Tiktok
   user:     root
-  password: 12137
+  password: lht12138
   maxOpen:  200
   maxConn:  200
 

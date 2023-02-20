@@ -40,15 +40,15 @@ func UserRegister(c *gin.Context) {
 		return
 	}
 
-	//// 唯一性校验
-	//if exist := user.Exist(username); exist {
-	//	log.Infos(c, "User already exist")
-	//	c.JSON(http.StatusOK, UserLoginResponse{
-	//		Response: Response{
-	//			StatusCode: 1,
-	//			StatusMsg:  "User already exist"}})
-	//	return
-	//}
+	// 唯一性校验
+	if exist := model.ExistUser(username); exist {
+		log.Infos(c, "User already exist")
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  "User already exist"}})
+		return
+	}
 
 	// 创建account
 	account := map[string]interface{}{
@@ -56,7 +56,6 @@ func UserRegister(c *gin.Context) {
 		"password": hash.Md5WithSalt(password, config.AuthSetting.Md5Salt),
 	}
 
-	// 待添加token
 	if userID, err := model.CreateUser(account); err == nil {
 		log.Infos(c, "User register success")
 		token, err := jwt.CreateToken(strconv.Itoa(int(userID)), username)
@@ -95,27 +94,26 @@ func UserLogin(c *gin.Context) {
 		"password": hash.Md5WithSalt(password, config.AuthSetting.Md5Salt),
 	}
 
-	if id, err := model.CreateUser(account); err == nil {
-		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0},
-			UserId:   id,
-			Token:    "token",
-		})
-	} else {
+	id, err := model.ValidateUser(account)
+	if err != nil {
 		log.Infos(c, "User doesn't exist")
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
 		})
 		return
 	}
+	if token, err := jwt.CreateToken(strconv.Itoa(int(id)), username); err == nil {
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 0},
+			UserId:   id,
+			Token:    token,
+		})
+	}
 }
 
 func GetUserInfo(c *gin.Context) {
 
-	//token := c.Query("token")
-
 	userID := c.Query("user_id")
-
 	if ModelUser, err := model.ReadUser(userID); err == nil {
 
 		c.JSON(http.StatusOK, UserResponse{

@@ -19,14 +19,13 @@ func InitRouter() *gin.Engine {
 	// 初始化metric
 	metric.Set(r)
 
-	r.Use()
-	// 创建路由组
-	douyin := r.Group("/douyin")
-
-	// feed组，视频流
-	feed := douyin.Group("/feed")
-	feed.Use(jwt.VerfyMiddleware())
+	// feed组，视频流，无需验证登录状态
+	feed := r.Group("/douyin/feed")
 	feed.GET("/", handlers.GetFeed)
+
+	// 创建路由组，jwt验证
+	douyin := r.Group("/douyin")
+	douyin.Use(jwt.VerifyMiddleware())
 
 	// user组，用户
 	user := douyin.Group("/user")
@@ -49,12 +48,6 @@ func InitRouter() *gin.Engine {
 	comment.Use(jwt.VerfyMiddleware())
 	comment.POST("/action", handlers.CommentAction)
 	comment.GET("/list", handlers.GetCommentList)
-
-	// relation组，关注
-	relation := douyin.Group("/relation")
-	relation.POST("/action", handlers.RelationAction)
-	relation.GET("/follow/list", handlers.GetRelationFollowList)
-	relation.GET("/follower/list", handlers.GetRelationFollowerList)
 
 	return r
 }

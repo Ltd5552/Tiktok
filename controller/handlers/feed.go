@@ -9,34 +9,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type FeedResponse struct{
+type FeedResponse struct {
 	Response
 	Video_list []Video
-	Next_time int64
+	Next_time  int64
 }
 
 // 将video数据从数据库结构体转成response结构体
-func VideosConv(id uint, videos []model.Video) ([]Video, int64){
+func VideosConv(id uint, videos []model.Video) ([]Video, int64) {
 	var convVideos []Video
 	var lastestTime int64
-	for _, video := range(videos){
+	for _, video := range videos {
 		var convVideo Video
 		convVideo.Id = video.Model.ID
-		user, err := model.ReadUser(strconv.Itoa(int(video.Author_id)))
-		if err != nil{
+		user, err := model.ReadUser(strconv.Itoa(int(video.AuthorId)))
+		if err != nil {
 			convVideo.Author = User{}
-		} else{
+		} else {
 			convVideo.Author = User{
-				Id: user.Model.ID,
+				Id:   user.Model.ID,
 				Name: user.Name,
 			}
 		}
-		convVideo.PlayUrl = video.Play_url
-		convVideo.CoverUrl = video.Cover_url
-		convVideo.CommentCount = video.Comment_count
-		if id == 0{
+		convVideo.PlayUrl = video.PlayUrl
+		convVideo.CoverUrl = video.CoverUrl
+		convVideo.CommentCount = video.CommentCount
+		if id == 0 {
 			convVideo.IsFavorite = false
-		} else{
+		} else {
 			convVideo.IsFavorite = model.JudgeFavorite(id, video.Model.ID)
 		}
 		convVideos = append(convVideos, convVideo)
@@ -51,7 +51,7 @@ func GetFeed(c *gin.Context) {
 	lastestTime := c.Query("latest_time")
 	login, _ := c.Get("Login")
 	time, err := strconv.Atoi(lastestTime)
-	if err !=nil {
+	if err != nil {
 		log.Error("time to int error" + err.Error())
 		c.JSON(http.StatusOK, FeedResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "time to int error"},
@@ -61,11 +61,11 @@ func GetFeed(c *gin.Context) {
 	var id uint
 	if login == false {
 		id = 0
-	} else{
+	} else {
 		// 获取登录者的ID信息
 		tmp, _ := c.Get("ID")
 		var ok bool
-		if id, ok = tmp.(uint); !ok{
+		if id, ok = tmp.(uint); !ok {
 			log.Error("id to int error")
 			c.JSON(http.StatusOK, FeedResponse{
 				Response: Response{StatusCode: 1, StatusMsg: "id to int error"},
@@ -83,6 +83,6 @@ func GetFeed(c *gin.Context) {
 	c.JSON(http.StatusOK, FeedResponse{
 		Response: Response{StatusCode: 0},
 		Video_list: video_list,
-		Next_time: new_time,
+		Next_time:  new_time,
 	})
 }
