@@ -84,6 +84,7 @@ func GetFavoriteList(c *gin.Context) {
 			true,
 			modelVideos[i].Title}
 	}
+	log.Infos(c, "get favorite lists")
 	c.JSON(http.StatusOK, FavoriteListResponse{
 		Response: Response{
 			StatusCode: 0,

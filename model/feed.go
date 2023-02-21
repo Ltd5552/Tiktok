@@ -24,7 +24,7 @@ type Favorite struct {
 }
 
 // JudgeFavorite 判断用户是否给该视频点赞
-func JudgeFavorite(userId uint, videoId uint) bool {
+func JudgeFavorite(userId int, videoId uint) bool {
 	var tmp Favorite
 	if err := DB.Where("user_id = ?", userId).Where("video_id = ?", videoId).Find(&tmp).Error; err == gorm.ErrRecordNotFound {
 		return false
@@ -41,14 +41,14 @@ func GetVideo(latestTime int) ([]Video, error) {
 	var videos []Video
 	if latestTime != 0 {
 		Time := time.Unix(int64(latestTime), 0)
-		err := DB.Where("create_at < ?", Time).Order("create_at desc").Limit(30).Find(&videos).Error
+		err := DB.Where("created_at < ?", Time).Order("created_at desc").Limit(30).Find(&videos).Error
 		if err != nil {
 			log.Error("select sql failed", zap.Error(err))
 			return nil, err
 		}
 		return videos, nil
 	}
-	err := DB.Order("create_at desc").Limit(30).Find(&videos).Error
+	err := DB.Order("created_at desc").Limit(30).Find(&videos).Error
 	if err != nil {
 		log.Error("select sql failed", zap.Error(err))
 		return nil, err

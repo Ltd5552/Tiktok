@@ -31,22 +31,20 @@ func ReadUser(id string) (User, error) {
 	return user, nil
 }
 
-func ValidateUser(data map[string]interface{}) (uint, error) {
+func ValidateUser(data map[string]interface{}) uint {
 	user := &User{
 		Name:     data["name"].(string),
 		Password: data["password"].(string),
 	}
-	err := DB.Where("name = ? AND password = ?", user.Name, user.Password).Find(&user).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return 0, err
-	}
-	return user.ID, nil
+	//err := DB.Where("name = ? AND password = ?", user.Name, user.Password).Find(&user).Error
+	DB.Where("name = ?", user.Name).Where("password = ?", user.Password).Find(&user)
+	return user.ID
 }
 
 func ExistUser(username string) bool {
 	var user User
-	err := DB.First(&user, "username = ?", username).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
+	err := DB.First(&user, "name = ?", username).Error
+	if err == gorm.ErrRecordNotFound {
 		return false
 	}
 	return true

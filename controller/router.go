@@ -13,6 +13,9 @@ func InitRouter() *gin.Engine {
 
 	r := gin.New()
 
+	//设置文件最大容量
+	r.MaxMultipartMemory = 2 << 26
+
 	// 初始化trace
 	trace.Set(r)
 
@@ -23,31 +26,31 @@ func InitRouter() *gin.Engine {
 	feed := r.Group("/douyin/feed")
 	feed.GET("/", handlers.GetFeed)
 
-	// 创建路由组，jwt验证
-	douyin := r.Group("/douyin")
-	douyin.Use(jwt.VerifyMiddleware())
-
 	// user组，用户
-	user := douyin.Group("/user")
+	user := r.Group("/douyin/user")
 	user.GET("/", handlers.GetUserInfo)
-	user.POST("/register", handlers.UserRegister)
-	user.POST("/login", handlers.UserLogin)
+	user.POST("/login/", handlers.UserLogin)
+	user.POST("/register/", handlers.UserRegister)
+
+	douyin := r.Group("/douyin")
 
 	// publish组，投稿
 	publish := douyin.Group("/publish")
-	publish.POST("/action", handlers.PublishAction)
-	publish.GET("/list", handlers.GetPublishList)
+	publish.Use(jwt.VerifyMiddleware())
+	publish.POST("/action/", handlers.PublishAction)
+	publish.GET("/list/", handlers.GetPublishList)
 
 	// favorite组，喜欢
 	favorite := douyin.Group("/favorite")
-	favorite.POST("/action", handlers.FavoriteAction)
-	favorite.GET("/list", handlers.GetFavoriteList)
+	favorite.Use(jwt.VerifyMiddleware())
+	favorite.POST("/action/", handlers.FavoriteAction)
+	favorite.GET("/list/", handlers.GetFavoriteList)
 
 	// comment组，评论
 	comment := douyin.Group("/comment")
 	comment.Use(jwt.VerifyMiddleware())
-	comment.POST("/action", handlers.CommentAction)
-	comment.GET("/list", handlers.GetCommentList)
+	comment.POST("/action/", handlers.CommentAction)
+	comment.GET("/list/", handlers.GetCommentList)
 
 	return r
 }

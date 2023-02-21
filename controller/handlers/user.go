@@ -57,13 +57,13 @@ func UserRegister(c *gin.Context) {
 	}
 
 	if userID, err := model.CreateUser(account); err == nil {
-		log.Infos(c, "User register success")
 		token, err := jwt.CreateToken(strconv.Itoa(int(userID)), username)
 		if err != nil {
 			log.Error("Create token error", zap.Error(err))
 		}
+		log.Infos(c, "User register success")
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 0, StatusMsg: "User already exist"},
+			Response: Response{StatusCode: 0, StatusMsg: "User register success"},
 			UserId:   userID,
 			Token:    token})
 	} else {
@@ -94,11 +94,21 @@ func UserLogin(c *gin.Context) {
 		"password": hash.Md5WithSalt(password, config.AuthSetting.Md5Salt),
 	}
 
-	id, err := model.ValidateUser(account)
-	if err != nil {
+	//存在性校验
+	if exist := model.ExistUser(username); !exist {
 		log.Infos(c, "User doesn't exist")
 		c.JSON(http.StatusOK, UserLoginResponse{
-			Response: Response{StatusCode: 1, StatusMsg: "User doesn't exist"},
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  "User doesn't exist"}})
+		return
+	}
+
+	id := model.ValidateUser(account)
+	if id == 0 {
+		log.Infos(c, "username or password err")
+		c.JSON(http.StatusOK, UserLoginResponse{
+			Response: Response{StatusCode: 1, StatusMsg: "username or password err"},
 		})
 		return
 	}
@@ -106,22 +116,29 @@ func UserLogin(c *gin.Context) {
 		c.JSON(http.StatusOK, UserLoginResponse{
 			Response: Response{StatusCode: 0},
 			UserId:   id,
-			Token:    token,
-		})
+			Token:    token})
 	}
 }
 
 func GetUserInfo(c *gin.Context) {
 
 	userID := c.Query("user_id")
+	token := c.Query("token")
+	if token == "" {
+		c.JSON(http.StatusOK, UserResponse{
+			Response: Response{
+				StatusCode: 1,
+				StatusMsg:  "please login first"},
+		})
+		return
+	}
 	if ModelUser, err := model.ReadUser(userID); err == nil {
 
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{StatusCode: 0},
 			User: User{
 				Name: ModelUser.Name,
-				Id:   ModelUser.ID,
-			},
+				Id:   ModelUser.ID},
 		})
 	} else {
 		log.Infos(c, "User doesn't exist")
@@ -132,7 +149,7 @@ func GetUserInfo(c *gin.Context) {
 }
 
 func ValidateAccount(username string, password string) bool {
-	NameRegExp := regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]{3,32}$`) // 字母开头，允许3-32字节，允许字母数字下划线
-	PasswordRegExp := regexp.MustCompile(`^[a-zA-Z]\w{6,32}$`)       // 字母开头，长度在6~32字节，只能包含字母、数字和下划线
+	NameRegExp := regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]{2,31}$`) // 字母开头，允许3-32字节，允许字母数字下划线
+	PasswordRegExp := regexp.MustCompile(`^[a-zA-Z]\w{5,31}$`)       // 字母开头，长度在6~32字节，只能包含字母、数字和下划线
 	return NameRegExp.MatchString(username) && PasswordRegExp.MatchString(password)
 }

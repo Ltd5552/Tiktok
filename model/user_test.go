@@ -27,3 +27,11 @@ func TestCreatAndReadUser(t *testing.T) {
 	}
 	fmt.Println(user)
 }
+
+func TestExistUser(t *testing.T) {
+	config.InitViper()
+	InitDB()
+	flag := ExistUser("ltd")
+	fmt.Println(flag)
+
+}

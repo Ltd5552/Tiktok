@@ -30,10 +30,9 @@ func GetList(userID int) ([]*Video, error) {
 	//form video
 	//where video.id = (
 	//select videoID
-	//form favorite
+	//form favorites
 	//where userID = userID)
-	subQuery := DB.Select("video_id").Where("user_id = ?", userID).Table("favorite")
-	err := DB.Where("video_id = ?").Where(subQuery).Find(&videos).Error
+	err := DB.Where("id = (?)", DB.Where("user_id = ?", userID).Table("favorites").Select("video_id")).Find(&videos).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
