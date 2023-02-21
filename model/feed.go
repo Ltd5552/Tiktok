@@ -37,10 +37,10 @@ func JudgeFavorite(userId int, videoId uint) bool {
 
 // 从数据库中获取video信息
 
-func GetVideo(latestTime int) ([]Video, error) {
+func GetVideo(latestTime int64) ([]Video, error) {
 	var videos []Video
-	if latestTime != 0 {
-		Time := time.Unix(int64(latestTime), 0)
+	Time := time.Unix(latestTime, 0)
+	if latestTime != 0 && Time.Before(time.Now()){
 		err := DB.Where("created_at < ?", Time).Order("created_at desc").Limit(30).Find(&videos).Error
 		if err != nil {
 			log.Error("select sql failed", zap.Error(err))
