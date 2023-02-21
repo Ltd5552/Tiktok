@@ -5,6 +5,7 @@ import (
 	"Tiktok/controller"
 	"Tiktok/model"
 	"Tiktok/pkg/log"
+	"Tiktok/pkg/minio"
 	"fmt"
 	"go.uber.org/zap"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 func init() {
 	config.InitViper()
 	model.InitDB()
+	minio.InitMinio()
 }
 
 func main() {

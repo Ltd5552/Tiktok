@@ -39,7 +39,7 @@ func DeleteComment(commentId uint) (Comment, error) {
 
 func GetComment(videoId string) ([]Comment, error) {
 	var commentList []Comment
-	if err := DB.Order("create_at desc").Where("video_id = ?", videoId).Find(&commentList).Error; err != nil {
+	if err := DB.Order("created_at desc").Where("video_id = ?", videoId).Find(&commentList).Error; err != nil {
 		return nil, err
 	}
 	return commentList, nil

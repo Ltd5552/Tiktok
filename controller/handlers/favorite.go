@@ -64,7 +64,7 @@ func GetFavoriteList(c *gin.Context) {
 		return
 	}
 	// 如何权衡model.Video和handler.Video?
-	modelVideos, err := model.GetList(userID.(int))
+	modelVideos, err := model.GetVideoByLike(userID.(int))
 	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,

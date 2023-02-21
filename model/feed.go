@@ -9,12 +9,12 @@ import (
 )
 
 type Video struct {
-	AuthorId      uint   `gorm:"column:author_id" json:"author_id"`
-	PlayUrl       string `gorm:"column:play_url" json:"play_url"`
-	CoverUrl      string `gorm:"column:cover_url" json:"cover_url"`
-	FavoriteCount int64  `gorm:"column:favorite_count" json:"favorite_count"`
-	CommentCount  int64  `gorm:"column:comment_count" json:"comment_count"`
-	Title         string `gorm:"column:title" json:"title"`
+	AuthorId      uint   `gorm:"column:author_id"`
+	PlayUrl       string `gorm:"column:play_url"`
+	CoverUrl      string `gorm:"column:cover_url"`
+	FavoriteCount int64  `gorm:"column:favorite_count"`
+	CommentCount  int64  `gorm:"column:comment_count"`
+	Title         string `gorm:"column:title"`
 	gorm.Model
 }
 
@@ -35,12 +35,11 @@ func JudgeFavorite(userId int, videoId uint) bool {
 	return true
 }
 
-// 从数据库中获取video信息
-
-func GetVideo(latestTime int64) ([]Video, error) {
+// GetVideoByTime 从数据库中获取video信息
+func GetVideoByTime(latestTime int64) ([]Video, error) {
 	var videos []Video
 	Time := time.Unix(latestTime, 0)
-	if latestTime != 0 && Time.Before(time.Now()){
+	if latestTime != 0 && Time.Before(time.Now()) {
 		err := DB.Where("created_at < ?", Time).Order("created_at desc").Limit(30).Find(&videos).Error
 		if err != nil {
 			log.Error("select sql failed", zap.Error(err))

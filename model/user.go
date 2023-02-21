@@ -7,7 +7,7 @@ import (
 type User struct {
 	Name           string  `json:"name"`
 	Password       string  `json:"password"`
-	FavoriteVideos []Video `gorm:"many2many:Favorite" json:"video_list"`
+	FavoriteVideos []Video `gorm:"many2many:Favorites" json:"video_list"`
 	gorm.Model
 }
 
@@ -36,7 +36,6 @@ func ValidateUser(data map[string]interface{}) uint {
 		Name:     data["name"].(string),
 		Password: data["password"].(string),
 	}
-	//err := DB.Where("name = ? AND password = ?", user.Name, user.Password).Find(&user).Error
 	DB.Where("name = ?", user.Name).Where("password = ?", user.Password).Find(&user)
 	return user.ID
 }
@@ -44,6 +43,7 @@ func ValidateUser(data map[string]interface{}) uint {
 func ExistUser(username string) bool {
 	var user User
 	err := DB.First(&user, "name = ?", username).Error
+	//若没有这条记录就返回false
 	if err == gorm.ErrRecordNotFound {
 		return false
 	}

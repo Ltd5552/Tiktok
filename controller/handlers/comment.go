@@ -40,38 +40,29 @@ func CommentAction(c *gin.Context) {
 	login, _ := c.Get("Login")
 	tmpVideoId := c.Query("video_id")
 	actionType := c.Query("action_type")
-	var id uint
+
 	if login == false {
 		c.JSON(http.StatusOK, CommentResponse{
 			Response: Response{
 				StatusCode: 1,
-				StatusMsg:  "comment need login first",
-			},
-			Comment: Comment{},
-		})
+				StatusMsg:  "comment need login first"},
+			Comment: Comment{}})
 		return
-	} else {
-		tmp, _ := c.Get("ID")
-		var ok bool
-		if id, ok = tmp.(uint); !ok {
-			log.Errors(c, "id to int error")
-			c.JSON(http.StatusOK, CommentResponse{
-				Response: Response{StatusCode: 1, StatusMsg: "id to int error"},
-			})
-			return
-		}
 	}
+
+	id, _ := c.Get("ID")
 	if actionType == "1" {
 		commentText := c.Query("comment_text")
 		videoId, err := strconv.Atoi(tmpVideoId)
 		if err != nil {
 			log.Errors(c, "video_id conv int failed", zap.Error(err))
 			c.JSON(http.StatusOK, CommentResponse{
-				Response: Response{StatusCode: 1, StatusMsg: "video_id conv int failed"},
-			})
+				Response: Response{
+					StatusCode: 1,
+					StatusMsg:  "video_id conv int failed"}})
 			return
 		}
-		comment, err := model.CreateComment(id, uint(videoId), commentText)
+		comment, err := model.CreateComment(id.(uint), uint(videoId), commentText)
 		if err != nil {
 			c.JSON(http.StatusOK, CommentResponse{
 				Response: Response{StatusCode: 1, StatusMsg: err.Error()},
@@ -117,27 +108,16 @@ func CommentAction(c *gin.Context) {
 }
 
 func GetCommentList(c *gin.Context) {
-	videoId := c.Query("vedio_id")
+	videoId := c.Query("video_id")
 	login, _ := c.Get("Login")
 	if login == false {
 		c.JSON(http.StatusOK, CommentListResponse{
 			Response: Response{
 				StatusCode: 1,
-				StatusMsg:  "get comment need login first",
-			},
-		})
+				StatusMsg:  "get comment need login first"}})
 		return
-	} else {
-		tmp, _ := c.Get("ID")
-		var ok bool
-		if _, ok = tmp.(uint); !ok {
-			log.Errors(c, "id to int error")
-			c.JSON(http.StatusOK, CommentResponse{
-				Response: Response{StatusCode: 1, StatusMsg: "id to int error"},
-			})
-			return
-		}
 	}
+
 	commentList, err := model.GetComment(videoId)
 	if err != nil {
 		log.Errors(c, "Get comment_list error", zap.Error(err))
