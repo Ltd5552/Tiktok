@@ -5,6 +5,7 @@ import (
 	"Tiktok/pkg/log"
 	"errors"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -26,7 +27,9 @@ func CreateToken(id string, name string) (string, error) {
 	claim := Claims{
 		ID:               id,
 		Name:             name,
-		RegisteredClaims: jwt.RegisteredClaims{},
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	return token.SignedString(MySecret)
