@@ -83,5 +83,5 @@ func InitViper() {
 	if err = minio.Unmarshal(&MinioSetting); err != nil {
 		log.Error("Config load err", zap.Error(err))
 	}
-	log.Info("Config init success")
+	log.Info("Config init successfully")
 }

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"Tiktok/model"
-	"Tiktok/pkg/jwt"
 	"Tiktok/pkg/log"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -18,13 +17,11 @@ type FavoriteListResponse struct {
 func FavoriteAction(c *gin.Context) {
 	videoId := c.Query("video_id")
 	actionType := c.Query("action_type")
-	token := c.Query("token")
-
-	userID, err := jwt.ParseToken(token)
-	if err != nil {
+	userID, exit := c.Get("ID")
+	if exit == false {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error()})
+			StatusMsg:  "please login first"})
 		return
 	}
 
@@ -45,10 +42,10 @@ func FavoriteAction(c *gin.Context) {
 	} else if actionType == "2" {
 		//取消点赞
 		if err := model.Dislike(favorite); err != nil {
-			log.Errors(c, "like video err:", zap.Error(err))
+			log.Errors(c, "dislike video err:", zap.Error(err))
 			c.JSON(http.StatusOK, Response{
 				StatusCode: 1,
-				StatusMsg:  "like video err"})
+				StatusMsg:  "dislike video err"})
 			return
 		}
 	}
@@ -59,26 +56,25 @@ func FavoriteAction(c *gin.Context) {
 }
 
 func GetFavoriteList(c *gin.Context) {
-	token := c.Query("token")
-
-	userID, err := jwt.ParseToken(token)
+	userID, exit := c.Get("ID")
+	if exit == false {
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  "please login first"})
+		return
+	}
+	// 如何权衡model.Video和handler.Video?
+	modelVideos, err := model.GetList(userID.(int))
 	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error()})
 		return
 	}
-	// 如何权衡model.Video和handler.Video?
-	modelVideos, err := model.GetList(userID)
 	var videos []*Video
 	for i := 0; i < len(modelVideos); i++ {
 		modelUser, _ := model.ReadUser(strconv.Itoa(int(modelVideos[i].AuthorId)))
-
-		user := User{
-			modelUser.ID,
-			modelUser.Name,
-		}
-
+		user := User{modelUser.ID, modelUser.Name}
 		videos[i] = &Video{modelVideos[i].ID,
 			user,
 			modelVideos[i].PlayUrl,

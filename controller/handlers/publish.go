@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"Tiktok/model"
-	"Tiktok/pkg/jwt"
 	"Tiktok/pkg/log"
 	"Tiktok/pkg/minio"
+	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	ffmpeg_go "github.com/u2takey/ffmpeg-go"
 	"go.uber.org/zap"
+	"io"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -19,76 +21,119 @@ type VideoListResponse struct {
 }
 
 func PublishAction(c *gin.Context) {
-	data, err := c.FormFile("data")
-	if err != nil {
+	userID, exit := c.Get("ID")
+	if exit == false {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
+			StatusMsg:  "please login first"})
 		return
 	}
 
-	filename := filepath.Base(data.Filename)
-	token := c.Query("token")
-	userID, err := jwt.ParseToken(token)
+	//读取fileHeader
+	fileHeader, err := c.FormFile("data")
 	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
+			StatusMsg:  err.Error()})
 		return
 	}
-	finalName := fmt.Sprintf("%d_%s", userID, filename)
-	//上传到minio
-	saveFile := filepath.Join("./public/", finalName)
-	if err := minio.UploadFile("", finalName, "data", saveFile); err != nil {
+	//从header打开关联的file
+	file, err := fileHeader.Open()
+	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
+			StatusMsg:  err.Error()})
 		return
 	}
 
-	// 数据库创建
-	// 创建video
-	video := map[string]interface{}{
-		"authorId": userID,
-		"playUrl":  "",
-		"coverUrl": "",
-		"title":    "",
-	}
-	if err := model.CreatVideo(video); err != nil {
+	videoName := fmt.Sprintf("%d_%s", userID, filepath.Base(fileHeader.Filename))
+
+	//将file类型读取为byte
+	videoByte, err := io.ReadAll(file)
+	//上传视频到minio
+	if err := minio.UploadFile("video", videoByte, videoName, "video/mp4"); err != nil {
 		log.Infos(c, "video upload err", zap.Error(err))
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
-			StatusMsg:  "User register err"})
+			StatusMsg:  err.Error()})
+		return
+	}
+	//获取视频链接
+	videoUrl, err := minio.GetFile("video", videoName)
+	if err != nil {
+		log.Infos(c, "videoUrl get err", zap.Error(err))
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error()})
+		return
+	}
+	//获取视频封面
+	coverByte, err := getCover(videoUrl.String(), 1)
+	if err != nil {
+		log.Infos(c, "cover get err", zap.Error(err))
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error()})
+		return
+	}
+
+	//上传图片到minio
+	if err := minio.UploadFile("cover", coverByte, videoName, "image/jpeg"); err != nil {
+		log.Infos(c, "cover upload err", zap.Error(err))
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error()})
+		return
+	}
+	//获取封面链接
+	coverUrl, err := minio.GetFile("cover", videoName)
+	if err != nil {
+		log.Infos(c, "coverUrl get err", zap.Error(err))
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error()})
+		return
+	}
+	//创建video并将视频和封面链接存入数据库
+	video := map[string]interface{}{
+		"authorId": userID,
+		"playUrl":  videoUrl,
+		"coverUrl": coverUrl,
+		"title":    videoName,
+	}
+	if err := model.CreatVideo(video); err != nil {
+		log.Infos(c, "video model save err", zap.Error(err))
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, Response{
 		StatusCode: 0,
-		StatusMsg:  finalName + " uploaded successfully",
+		StatusMsg:  videoName + " uploaded successfully",
 	})
 }
 
 func GetPublishList(c *gin.Context) {
-	token := c.Query("token")
-	userID, err := jwt.ParseToken(token)
+	userID, exit := c.Get("ID")
+	if exit == false {
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  "please login first"})
+		return
+	}
+
+	modelVideos, err := model.GetPublishedVideos(userID.(int))
 	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
-			StatusMsg:  err.Error(),
-		})
+			StatusMsg:  err.Error()})
 		return
 	}
-	modelVideos, err := model.GetPublishedVideos(userID)
 	var videos []*Video
 	for i := 0; i < len(modelVideos); i++ {
 		modelUser, _ := model.ReadUser(strconv.Itoa(int(modelVideos[i].AuthorId)))
-
-		user := User{
-			modelUser.ID,
-			modelUser.Name,
-		}
+		user := User{modelUser.ID, modelUser.Name}
 
 		videos[i] = &Video{modelVideos[i].ID,
 			user,
@@ -106,4 +151,17 @@ func GetPublishList(c *gin.Context) {
 		},
 		VideoList: videos,
 	})
+}
+
+func getCover(videoPath string, frameNum int) ([]byte, error) {
+	buf := bytes.NewBuffer(nil)
+	err := ffmpeg_go.Input(videoPath).Filter("select", ffmpeg_go.Args{fmt.Sprintf("gte(n,%d)", frameNum)}).
+		Output("pipe:", ffmpeg_go.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
+		WithOutput(buf).
+		Run()
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }

@@ -64,13 +64,13 @@ func ParseToken(tokenstr string) (int, error) {
 		return id, nil
 	}
 	log.Error("token parse error")
-	return 0, errors.New("couldn`t parse the token")
+	return 0, errors.New("couldn't parse the token")
 }
 
 func VerifyMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		token := ctx.Query("token")
-		if token == ""{
+		if token == "" {
 			ctx.Set("Login", false)
 			ctx.Next()
 		}
