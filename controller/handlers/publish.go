@@ -22,7 +22,7 @@ type VideoListResponse struct {
 
 func PublishAction(c *gin.Context) {
 	userID, exit := c.Get("ID")
-	if exit == false {
+	if !exit {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  "please login first"})
@@ -50,6 +50,9 @@ func PublishAction(c *gin.Context) {
 
 	//将file类型读取为byte
 	videoByte, err := io.ReadAll(file)
+	if err != nil {
+		log.Error("Read file error")
+	}
 	//上传视频到minio
 	if err := minio.UploadFile("video", videoByte, videoName, "video/mp4"); err != nil {
 		log.Infos(c, "video upload err", zap.Error(err))
@@ -59,16 +62,9 @@ func PublishAction(c *gin.Context) {
 		return
 	}
 	//获取视频链接
-	videoUrl, err := minio.GetFile("video", videoName)
-	if err != nil {
-		log.Infos(c, "videoUrl get err", zap.Error(err))
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error()})
-		return
-	}
+	videoUrl := fmt.Sprintf("1.15.78.83:9001/video/%s", videoName)
 	//获取视频封面
-	coverByte, err := getCover(videoUrl.String(), 1)
+	coverByte, err := getCover(videoUrl, 1)
 	if err != nil {
 		log.Infos(c, "cover get err", zap.Error(err))
 		c.JSON(http.StatusOK, Response{
@@ -86,14 +82,7 @@ func PublishAction(c *gin.Context) {
 		return
 	}
 	//获取封面链接
-	coverUrl, err := minio.GetFile("cover", videoName)
-	if err != nil {
-		log.Infos(c, "coverUrl get err", zap.Error(err))
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error()})
-		return
-	}
+	coverUrl := fmt.Sprintf("1.15.78.83:9001/cover/%s", videoName)
 	//创建video并将视频和封面链接存入数据库
 	video := map[string]interface{}{
 		"authorId": userID,
@@ -116,7 +105,7 @@ func PublishAction(c *gin.Context) {
 
 func GetPublishList(c *gin.Context) {
 	userID, exit := c.Get("ID")
-	if exit == false {
+	if !exit {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  "please login first"})
