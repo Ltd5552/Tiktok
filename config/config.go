@@ -3,6 +3,7 @@ package config
 import (
 	"Tiktok/pkg/log"
 	"fmt"
+	"time"
 
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -10,8 +11,10 @@ import (
 
 // Server 添加yaml字段便于后面直接从yaml类型的配置文件中关联绑定
 type Server struct {
-	Name string `yaml:"name"`
-	Port int    `yaml:"port"`
+	Name         string        `yaml:"name"`
+	Port         int           `yaml:"port"`
+	ReadTimeout  time.Duration `yaml:"readTimeout"`
+	WriteTimeout time.Duration `yaml:"writeTimeout"`
 }
 
 type Database struct {
