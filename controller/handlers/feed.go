@@ -49,7 +49,7 @@ func VideosConv(userID int, videos []model.Video) ([]Video, int64) {
 func GetFeed(c *gin.Context) {
 	// 获取是否登录和上次最晚时间
 	latestTime := c.Query("latest_time")
-	time, err := strconv.Atoi(latestTime)
+	time, err := strconv.ParseInt(latestTime, 10, 64)
 	if err != nil {
 		log.Errors(c, "time to int error"+err.Error())
 		c.JSON(http.StatusOK, FeedResponse{
