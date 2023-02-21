@@ -11,14 +11,14 @@ import (
 
 type FeedResponse struct {
 	Response
-	Video_list []Video
-	Next_time  int64
+	VideoList []Video
+	NextTime  int64
 }
 
-// 将video数据从数据库结构体转成response结构体
+// VideosConv 将video数据从数据库结构体转成response结构体
 func VideosConv(id uint, videos []model.Video) ([]Video, int64) {
 	var convVideos []Video
-	var lastestTime int64
+	var latestTime int64
 	for _, video := range videos {
 		var convVideo Video
 		convVideo.Id = video.Model.ID
@@ -41,23 +41,23 @@ func VideosConv(id uint, videos []model.Video) ([]Video, int64) {
 		}
 		convVideos = append(convVideos, convVideo)
 		// 记录创建最晚时间
-		lastestTime = video.Model.CreatedAt.Unix()
+		latestTime = video.Model.CreatedAt.Unix()
 	}
-	return convVideos, lastestTime
+	return convVideos, latestTime
 }
 
 func GetFeed(c *gin.Context) {
 	// 获取是否登录和上次最晚时间
-	lastestTime := c.Query("latest_time")
+	latestTime := c.Query("latest_time")
 	login, _ := c.Get("Login")
-	time, err := strconv.Atoi(lastestTime)
+	time, err := strconv.Atoi(latestTime)
 	if err != nil {
-		log.Error("time to int error" + err.Error())
+		log.Errors(c, "time to int error"+err.Error())
 		c.JSON(http.StatusOK, FeedResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "time to int error"},
 		})
 	}
-	var video_list []Video
+	var videoList []Video
 	var id uint
 	if login == false {
 		id = 0
@@ -66,23 +66,23 @@ func GetFeed(c *gin.Context) {
 		tmp, _ := c.Get("ID")
 		var ok bool
 		if id, ok = tmp.(uint); !ok {
-			log.Error("id to int error")
+			log.Errors(c, "id to int error")
 			c.JSON(http.StatusOK, FeedResponse{
 				Response: Response{StatusCode: 1, StatusMsg: "id to int error"},
 			})
 			id = 0
 		}
 	}
-	model_video_list, err := model.GetVideo(id, time)
+	modelVideoList, err := model.GetVideo(time)
 	if err != nil {
 		c.JSON(http.StatusOK, FeedResponse{
 			Response: Response{StatusCode: 1, StatusMsg: err.Error()},
 		})
 	}
-	video_list, new_time := VideosConv(id, model_video_list)
+	videoList, newTime := VideosConv(id, modelVideoList)
 	c.JSON(http.StatusOK, FeedResponse{
-		Response: Response{StatusCode: 0},
-		Video_list: video_list,
-		Next_time:  new_time,
+		Response:  Response{StatusCode: 0},
+		VideoList: videoList,
+		NextTime:  newTime,
 	})
 }

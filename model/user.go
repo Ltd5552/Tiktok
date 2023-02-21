@@ -7,7 +7,7 @@ import (
 type User struct {
 	Name           string  `json:"name"`
 	Password       string  `json:"password"`
-	FavoriteVideos []Video `gorm:"many2many:Favorite" json:"favorite_videos"`
+	FavoriteVideos []Video `gorm:"many2many:Favorite" json:"video_list"`
 	gorm.Model
 }
 
