@@ -17,16 +17,16 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-// 设置secret
+// MySecret 设置secret
 var MySecret = []byte(config.AuthSetting.JwtSecret)
 
-// 创建token
+// CreateToken 创建token
 // 传入参数id，name(数据库ID、name)
 // 返回参数token和错误信息
 func CreateToken(id string, name string) (string, error) {
 	claim := Claims{
-		ID:               id,
-		Name:             name,
+		ID:   id,
+		Name: name,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 		},
@@ -41,7 +41,7 @@ func Secret() jwt.Keyfunc {
 	}
 }
 
-// 解析token
+// ParseToken 解析token
 // 传入参数token
 // 返回数据库id和错误信息
 func ParseToken(tokenstr string) (int, error) {

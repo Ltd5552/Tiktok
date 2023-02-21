@@ -71,7 +71,7 @@ func GetFeed(c *gin.Context) {
 		})
 	}
 
-	modelVideoList, err := model.GetVideo(time)
+	modelVideoList, err := model.GetVideoByTime(time)
 	if err != nil {
 		c.JSON(http.StatusOK, FeedResponse{
 			Response: Response{StatusCode: 1, StatusMsg: err.Error()},

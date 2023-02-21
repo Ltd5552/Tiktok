@@ -36,7 +36,6 @@ func InitRouter() *gin.Engine {
 
 	// publish组，投稿
 	publish := douyin.Group("/publish")
-	publish.Use(jwt.VerifyMiddleware())
 	publish.POST("/action/", handlers.PublishAction)
 	publish.GET("/list/", handlers.GetPublishList)
 

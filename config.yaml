@@ -19,7 +19,7 @@ jaeger:
   path: trace
 
 minio:
-  host: 127.0.0.1
+  host: 1.15.78.83
   port: 9000
   accessKeyID: admin
   secretAccessKey: 1766551219.qwe.

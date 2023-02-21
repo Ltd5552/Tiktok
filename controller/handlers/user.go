@@ -133,7 +133,6 @@ func GetUserInfo(c *gin.Context) {
 		return
 	}
 	if ModelUser, err := model.ReadUser(userID); err == nil {
-
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{StatusCode: 0},
 			User: User{

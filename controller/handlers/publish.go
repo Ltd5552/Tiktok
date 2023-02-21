@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"Tiktok/config"
 	"Tiktok/model"
+	"Tiktok/pkg/jwt"
 	"Tiktok/pkg/log"
 	"Tiktok/pkg/minio"
 	"bytes"
@@ -21,8 +23,9 @@ type VideoListResponse struct {
 }
 
 func PublishAction(c *gin.Context) {
-	userID, exit := c.Get("ID")
-	if !exit {
+	token := c.PostForm("token")
+	userID, err := jwt.ParseToken(token)
+	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  "please login first"})
@@ -62,30 +65,30 @@ func PublishAction(c *gin.Context) {
 		return
 	}
 	//获取视频链接
-	videoUrl := fmt.Sprintf("1.15.78.83:9001/video/%s", videoName)
-	//获取视频封面
-	coverByte, err := getCover(videoUrl, 1)
-	if err != nil {
-		log.Infos(c, "cover get err", zap.Error(err))
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error()})
-		return
-	}
+	videoUrl := fmt.Sprintf("%s:%s/video/%s", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
+	////获取视频封面
+	//coverByte, err := getCover(videoUrl, 1)
+	//if err != nil {
+	//	log.Infos(c, "cover get err", zap.Error(err))
+	//	c.JSON(http.StatusOK, Response{
+	//		StatusCode: 1,
+	//		StatusMsg:  err.Error()})
+	//	return
+	//}
 
 	//上传图片到minio
-	if err := minio.UploadFile("cover", coverByte, videoName, "image/jpeg"); err != nil {
-		log.Infos(c, "cover upload err", zap.Error(err))
-		c.JSON(http.StatusOK, Response{
-			StatusCode: 1,
-			StatusMsg:  err.Error()})
-		return
-	}
+	//if err := minio.UploadFile("cover", coverByte, videoName, "image/jpeg"); err != nil {
+	//	log.Infos(c, "cover upload err", zap.Error(err))
+	//	c.JSON(http.StatusOK, Response{
+	//		StatusCode: 1,
+	//		StatusMsg:  err.Error()})
+	//	return
+	//}
 	//获取封面链接
-	coverUrl := fmt.Sprintf("1.15.78.83:9001/cover/%s", videoName)
+	coverUrl := fmt.Sprintf("%s:%s/cover/%s", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
 	//创建video并将视频和封面链接存入数据库
 	video := map[string]interface{}{
-		"authorId": userID,
+		"authorId": uint(userID),
 		"playUrl":  videoUrl,
 		"coverUrl": coverUrl,
 		"title":    videoName,
@@ -104,15 +107,16 @@ func PublishAction(c *gin.Context) {
 }
 
 func GetPublishList(c *gin.Context) {
-	userID, exit := c.Get("ID")
-	if !exit {
+	token := c.Query("token")
+	userID, err := jwt.ParseToken(token)
+	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  "please login first"})
 		return
 	}
 
-	modelVideos, err := model.GetPublishedVideos(userID.(int))
+	modelVideos, err := model.GetPublishedVideos(userID)
 	if err != nil {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
@@ -120,19 +124,21 @@ func GetPublishList(c *gin.Context) {
 		return
 	}
 	var videos []*Video
-	for i := 0; i < len(modelVideos); i++ {
-		modelUser, _ := model.ReadUser(strconv.Itoa(int(modelVideos[i].AuthorId)))
+	for _, modelVideo := range modelVideos {
+		modelUser, _ := model.ReadUser(strconv.Itoa(int(modelVideo.AuthorId)))
 		user := User{modelUser.ID, modelUser.Name}
 
-		videos[i] = &Video{modelVideos[i].ID,
+		video := &Video{modelVideo.ID,
 			user,
-			modelVideos[i].PlayUrl,
-			modelVideos[i].CoverUrl,
-			modelVideos[i].FavoriteCount,
-			modelVideos[i].CommentCount,
+			modelVideo.PlayUrl,
+			modelVideo.CoverUrl,
+			modelVideo.FavoriteCount,
+			modelVideo.CommentCount,
 			true,
-			modelVideos[i].Title}
+			modelVideo.Title}
+		videos = append(videos, video)
 	}
+	log.Infos(c, "get published lists")
 	c.JSON(http.StatusOK, VideoListResponse{
 		Response: Response{
 			StatusCode: 0,

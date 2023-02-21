@@ -24,7 +24,7 @@ func Dislike(data map[string]interface{}) error {
 	return nil
 }
 
-func GetList(userID int) ([]*Video, error) {
+func GetVideoByLike(userID int) ([]*Video, error) {
 	var videos []*Video
 	//select *
 	//form video
