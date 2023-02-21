@@ -18,7 +18,7 @@ func FavoriteAction(c *gin.Context) {
 	videoId := c.Query("video_id")
 	actionType := c.Query("action_type")
 	userID, exit := c.Get("ID")
-	if exit == false {
+	if !exit {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  "please login first"})
@@ -57,7 +57,7 @@ func FavoriteAction(c *gin.Context) {
 
 func GetFavoriteList(c *gin.Context) {
 	userID, exit := c.Get("ID")
-	if exit == false {
+	if !exit {
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  "please login first"})
