@@ -15,8 +15,8 @@ database:
 
 jaeger:
   host: 127.0.0.1
-  port: 12137
-  path: trace
+  port: 39411
+  path: traces
 
 minio:
   host: 1.15.78.83
@@ -26,4 +26,4 @@ minio:
 
 auth:
   md5Salt: PJzxlk8RcBwwDAtVupPf
-  jwtSecret: 密令123
+  jwtSecret: f89BLFB8Pdt7a9Q

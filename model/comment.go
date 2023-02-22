@@ -18,22 +18,49 @@ func CreateComment(userId int, videoId int, text string) (Comment, error) {
 		VideoId:     uint(videoId),
 	}
 
-	if err := DB.Create(&comment).Error; err != nil {
+	tx := DB.Begin()
+	if err := tx.Create(&comment).Error; err != nil {
+		tx.Rollback()
 		return Comment{}, err
 	}
+	var video Video
+	if err := tx.Where("id = ?", videoId).Find(&video).Error; err != nil {
+		return Comment{}, err
+	}
+	// UPDATE "comment_count" SET "comment_count" = comment_count + 1 WHERE "id" = videoID;
+	if err := tx.Model(&video).UpdateColumn("comment_count", gorm.Expr("comment_count + ?", 1)).Error; err != nil {
+		tx.Rollback()
+		return Comment{}, err
+	}
+	//提交事务
+	tx.Commit()
 	return *comment, nil
 }
 
 func DeleteComment(commentId uint) (Comment, error) {
 	var comment Comment
-	err := DB.Where("ID = ?", commentId).Find(&comment).Error
+	tx := DB.Begin()
+	err := tx.Where("id = ?", commentId).Find(&comment).Error
 	if err != nil {
+		tx.Rollback()
 		return Comment{}, err
 	}
+	var video Video
+	video.ID = comment.VideoId
 	err = DB.Delete(&Comment{}, commentId).Error
 	if err != nil {
+		tx.Rollback()
 		return Comment{}, err
 	}
+
+	// UPDATE "comment_count" SET "comment_count" = comment_count - 1 WHERE "id" = videoID;
+	if err := tx.Model(&video).UpdateColumn("comment_count", gorm.Expr("comment_count - ?", 1)).Error; err != nil {
+		tx.Rollback()
+		return Comment{}, err
+	}
+	//提交事务
+	tx.Commit()
+
 	return comment, nil
 }
 

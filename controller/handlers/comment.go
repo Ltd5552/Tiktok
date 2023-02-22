@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"Tiktok/model"
+	"Tiktok/pkg/jwt"
 	"Tiktok/pkg/log"
 	"net/http"
 	"strconv"
@@ -37,20 +38,19 @@ func CommentConv(comment model.Comment) (Comment, error) {
 }
 
 func CommentAction(c *gin.Context) {
-	login, _ := c.Get("Login")
+	token := c.Query("token")
 	tmpVideoId := c.Query("video_id")
 	actionType := c.Query("action_type")
 
-	if login == false {
-		c.JSON(http.StatusOK, CommentResponse{
+	userID, err := jwt.ParseToken(token)
+	if err != nil {
+		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{
 				StatusCode: 1,
-				StatusMsg:  "comment need login first"},
-			Comment: Comment{}})
+				StatusMsg:  "please login first"}})
 		return
 	}
 
-	id, _ := c.Get("ID")
 	if actionType == "1" {
 		commentText := c.Query("comment_text")
 		videoID, err := strconv.Atoi(tmpVideoId)
@@ -62,7 +62,7 @@ func CommentAction(c *gin.Context) {
 					StatusMsg:  "video_id conv int failed"}})
 			return
 		}
-		comment, err := model.CreateComment(id.(int), videoID, commentText)
+		comment, err := model.CreateComment(userID, videoID, commentText)
 		if err != nil {
 			c.JSON(http.StatusOK, CommentResponse{
 				Response: Response{StatusCode: 1, StatusMsg: err.Error()},
@@ -109,14 +109,6 @@ func CommentAction(c *gin.Context) {
 
 func GetCommentList(c *gin.Context) {
 	videoId := c.Query("video_id")
-	login, _ := c.Get("Login")
-	if login == false {
-		c.JSON(http.StatusOK, CommentListResponse{
-			Response: Response{
-				StatusCode: 1,
-				StatusMsg:  "get comment need login first"}})
-		return
-	}
 
 	commentList, err := model.GetComment(videoId)
 	if err != nil {

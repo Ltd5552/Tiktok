@@ -124,12 +124,12 @@ func GetUserInfo(c *gin.Context) {
 
 	userID := c.Query("user_id")
 	token := c.Query("token")
-	if token == "" {
+	_, err := jwt.ParseToken(token)
+	if err != nil {
 		c.JSON(http.StatusOK, UserResponse{
 			Response: Response{
 				StatusCode: 1,
-				StatusMsg:  "please login first"},
-		})
+				StatusMsg:  "please login first"}})
 		return
 	}
 	if ModelUser, err := model.ReadUser(userID); err == nil {
