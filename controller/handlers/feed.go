@@ -12,8 +12,8 @@ import (
 
 type FeedResponse struct {
 	Response
-	VideoList []Video
-	NextTime  int64
+	VideoList []Video `json:"video_list"`
+	NextTime  int64   `json:"next_time"`
 }
 
 // VideosConv 将video数据从数据库结构体转成response结构体
@@ -80,7 +80,7 @@ func GetFeed(c *gin.Context) {
 	videoList, newTime := VideosConv(userID, modelVideoList)
 	c.JSON(http.StatusOK, FeedResponse{
 		Response:  Response{StatusCode: 0},
-		VideoList: videoList,
 		NextTime:  newTime,
+		VideoList: videoList,
 	})
 }

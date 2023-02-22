@@ -11,11 +11,11 @@ type Comment struct {
 	gorm.Model
 }
 
-func CreateComment(userId uint, videoId uint, text string) (Comment, error) {
+func CreateComment(userId int, videoId int, text string) (Comment, error) {
 	comment := &Comment{
 		Text:        text,
-		CommenterId: userId,
-		VideoId:     videoId,
+		CommenterId: uint(userId),
+		VideoId:     uint(videoId),
 	}
 
 	if err := DB.Create(&comment).Error; err != nil {

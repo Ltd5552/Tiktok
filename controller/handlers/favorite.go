@@ -24,14 +24,17 @@ func FavoriteAction(c *gin.Context) {
 			StatusMsg:  "please login first"})
 		return
 	}
-
-	favorite := map[string]interface{}{
-		"userId":  userID,
-		"videoID": videoId,
+	videoID, err := strconv.Atoi(videoId)
+	if err != nil {
+		log.Errors(c, "video_id conv int failed", zap.Error(err))
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  "video_id conv int failed"})
+		return
 	}
 	if actionType == "1" {
 		//点赞
-		if err := model.Like(favorite); err != nil {
+		if err := model.Like(userID.(int), videoID); err != nil {
 			log.Errors(c, "like video err:", zap.Error(err))
 			c.JSON(http.StatusOK, Response{
 				StatusCode: 1,
@@ -41,7 +44,7 @@ func FavoriteAction(c *gin.Context) {
 
 	} else if actionType == "2" {
 		//取消点赞
-		if err := model.Dislike(favorite); err != nil {
+		if err := model.Dislike(userID.(int), videoID); err != nil {
 			log.Errors(c, "dislike video err:", zap.Error(err))
 			c.JSON(http.StatusOK, Response{
 				StatusCode: 1,

@@ -19,8 +19,8 @@ type Video struct {
 }
 
 type Favorite struct {
-	UserId  uint `gorm:"column:user_id"`
-	VideoId uint `gorm:"column:video_id"`
+	UserId  int `gorm:"column:user_id"`
+	VideoId int `gorm:"column:video_id"`
 }
 
 // JudgeFavorite 判断用户是否给该视频点赞
