@@ -12,12 +12,12 @@ import (
 
 type CommentResponse struct {
 	Response
-	Comment Comment
+	Comment Comment `json:"comment"`
 }
 
 type CommentListResponse struct {
 	Response
-	Comment []Comment
+	Comment []Comment `json:"comment_list"`
 }
 
 func CommentConv(comment model.Comment) (Comment, error) {
@@ -53,7 +53,7 @@ func CommentAction(c *gin.Context) {
 	id, _ := c.Get("ID")
 	if actionType == "1" {
 		commentText := c.Query("comment_text")
-		videoId, err := strconv.Atoi(tmpVideoId)
+		videoID, err := strconv.Atoi(tmpVideoId)
 		if err != nil {
 			log.Errors(c, "video_id conv int failed", zap.Error(err))
 			c.JSON(http.StatusOK, CommentResponse{
@@ -62,7 +62,7 @@ func CommentAction(c *gin.Context) {
 					StatusMsg:  "video_id conv int failed"}})
 			return
 		}
-		comment, err := model.CreateComment(id.(uint), uint(videoId), commentText)
+		comment, err := model.CreateComment(id.(int), videoID, commentText)
 		if err != nil {
 			c.JSON(http.StatusOK, CommentResponse{
 				Response: Response{StatusCode: 1, StatusMsg: err.Error()},

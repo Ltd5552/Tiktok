@@ -1,11 +1,13 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
-func Like(data map[string]interface{}) error {
-	favorite := &Favorite{
-		UserId:  data["userID"].(uint),
-		VideoId: data["videoID"].(uint),
+func Like(userID int, videoID int) error {
+	favorite := Favorite{
+		UserId:  userID,
+		VideoId: videoID,
 	}
 	if err := DB.Create(&favorite).Error; err != nil {
 		return err
@@ -13,12 +15,12 @@ func Like(data map[string]interface{}) error {
 	return nil
 }
 
-func Dislike(data map[string]interface{}) error {
-	favorite := &Favorite{
-		UserId:  data["userID"].(uint),
-		VideoId: data["videoID"].(uint),
+func Dislike(userID int, videoID int) error {
+	favorite := Favorite{
+		UserId:  userID,
+		VideoId: videoID,
 	}
-	if err := DB.Delete(&favorite).Error; err != nil {
+	if err := DB.Where("user_id = ?", userID).Where("video_id = ?", videoID).Delete(favorite).Error; err != nil {
 		return err
 	}
 	return nil

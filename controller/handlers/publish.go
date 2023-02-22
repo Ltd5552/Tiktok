@@ -65,7 +65,7 @@ func PublishAction(c *gin.Context) {
 		return
 	}
 	//获取视频链接
-	videoUrl := fmt.Sprintf("%s:%s/video/%s", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
+	videoUrl := fmt.Sprintf("http://%s:%s/video/%s", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
 	////获取视频封面
 	//coverByte, err := getCover(videoUrl, 1)
 	//if err != nil {
@@ -85,7 +85,8 @@ func PublishAction(c *gin.Context) {
 	//	return
 	//}
 	//获取封面链接
-	coverUrl := fmt.Sprintf("%s:%s/cover/%s", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
+	//coverUrl := fmt.Sprintf("%s:%s/cover/%s.png", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
+	coverUrl := "https://images.ltd7.ltd/img/2022-summary/summer.jpg"
 	//创建video并将视频和封面链接存入数据库
 	video := map[string]interface{}{
 		"authorId": uint(userID),
