@@ -75,17 +75,18 @@ func GetFavoriteList(c *gin.Context) {
 		return
 	}
 	var videos []*Video
-	for i := 0; i < len(modelVideos); i++ {
-		modelUser, _ := model.ReadUser(strconv.Itoa(int(modelVideos[i].AuthorId)))
+	for _, modelVideo := range modelVideos {
+		modelUser, _ := model.ReadUser(strconv.Itoa(int(modelVideo.AuthorId)))
 		user := User{modelUser.ID, modelUser.Name}
-		videos[i] = &Video{modelVideos[i].ID,
+		video := &Video{modelVideo.ID,
 			user,
-			modelVideos[i].PlayUrl,
-			modelVideos[i].CoverUrl,
-			modelVideos[i].FavoriteCount,
-			modelVideos[i].CommentCount,
+			modelVideo.PlayUrl,
+			modelVideo.CoverUrl,
+			modelVideo.FavoriteCount,
+			modelVideo.CommentCount,
 			true,
-			modelVideos[i].Title}
+			modelVideo.Title}
+		videos = append(videos, video)
 	}
 	log.Infos(c, "get favorite lists")
 	c.JSON(http.StatusOK, FavoriteListResponse{

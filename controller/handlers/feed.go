@@ -64,13 +64,7 @@ func GetFeed(c *gin.Context) {
 	if token == "" {
 		userID = 0
 	}
-	userID, err = jwt.ParseToken(token)
-	if err != nil {
-		c.JSON(http.StatusOK, FeedResponse{
-			Response: Response{StatusCode: 1, StatusMsg: err.Error()},
-		})
-	}
-
+	userID, _ = jwt.ParseToken(token)
 	modelVideoList, err := model.GetVideoByTime(time)
 	if err != nil {
 		c.JSON(http.StatusOK, FeedResponse{

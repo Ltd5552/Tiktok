@@ -135,7 +135,7 @@ func GetPublishList(c *gin.Context) {
 			modelVideo.CoverUrl,
 			modelVideo.FavoriteCount,
 			modelVideo.CommentCount,
-			true,
+			model.JudgeFavorite(userID, modelVideo.ID),
 			modelVideo.Title}
 		videos = append(videos, video)
 	}

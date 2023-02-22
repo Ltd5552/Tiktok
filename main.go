@@ -24,7 +24,6 @@ func main() {
 			log.Error("log sync err", zap.Error(err))
 		}
 	}()
-
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", config.ServerSetting.Port),
 		Handler:        controller.InitRouter(),
