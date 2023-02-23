@@ -5,7 +5,7 @@ server:
   writeTimeout: "60s"
 
 database:
-  host:     1.15.78.83
+  host:     127.0.0.1
   port:     9887
   name:     Tiktok
   user:     root
@@ -19,7 +19,7 @@ jaeger:
   path: traces
 
 minio:
-  host: 1.15.78.83
+  host: 127.0.0.1
   port: 9000
   accessKeyID: admin
   secretAccessKey: 1766551219.qwe.

@@ -66,27 +66,27 @@ func PublishAction(c *gin.Context) {
 	}
 	//获取视频链接
 	videoUrl := fmt.Sprintf("http://%s:%s/video/%s", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
-	////获取视频封面
-	//coverByte, err := getCover(videoUrl, 1)
-	//if err != nil {
-	//	log.Infos(c, "cover get err", zap.Error(err))
-	//	c.JSON(http.StatusOK, Response{
-	//		StatusCode: 1,
-	//		StatusMsg:  err.Error()})
-	//	return
-	//}
+	//获取视频封面
+	coverByte, err := getCover(videoUrl, 1)
+	if err != nil {
+		log.Infos(c, "cover get err", zap.Error(err))
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error()})
+		return
+	}
 
 	//上传图片到minio
-	//if err := minio.UploadFile("cover", coverByte, videoName, "image/jpeg"); err != nil {
-	//	log.Infos(c, "cover upload err", zap.Error(err))
-	//	c.JSON(http.StatusOK, Response{
-	//		StatusCode: 1,
-	//		StatusMsg:  err.Error()})
-	//	return
-	//}
+	if err := minio.UploadFile("cover", coverByte, videoName, "image/jpeg"); err != nil {
+		log.Infos(c, "cover upload err", zap.Error(err))
+		c.JSON(http.StatusOK, Response{
+			StatusCode: 1,
+			StatusMsg:  err.Error()})
+		return
+	}
 	//获取封面链接
-	//coverUrl := fmt.Sprintf("%s:%s/cover/%s.png", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
-	coverUrl := "https://images.ltd7.ltd/img/2022-summary/summer.jpg"
+	coverUrl := fmt.Sprintf("http://%s:%s/cover/%s.jpg", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
+	//coverUrl := "https://images.ltd7.ltd/img/2022-summary/summer.jpg"
 	//创建video并将视频和封面链接存入数据库
 	video := map[string]interface{}{
 		"authorId": uint(userID),
