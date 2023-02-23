@@ -15,8 +15,8 @@ database:
 
 jaeger:
   host: 127.0.0.1
-  port: 39411
-  path: traces
+  port: 14268
+  path: /api/traces
 
 minio:
   host: 127.0.0.1
