@@ -26,6 +26,7 @@ func PublishAction(c *gin.Context) {
 	token := c.PostForm("token")
 	userID, err := jwt.ParseToken(token)
 	if err != nil {
+		log.Infos(c, "login first")
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  "please login first"})
@@ -35,6 +36,7 @@ func PublishAction(c *gin.Context) {
 	//读取fileHeader
 	fileHeader, err := c.FormFile("data")
 	if err != nil {
+		log.Infos(c, "读取fileHeader失败")
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error()})
@@ -43,6 +45,7 @@ func PublishAction(c *gin.Context) {
 	//从header打开关联的file
 	file, err := fileHeader.Open()
 	if err != nil {
+		log.Infos(c, "file打开失败")
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg:  err.Error()})
@@ -85,7 +88,7 @@ func PublishAction(c *gin.Context) {
 		return
 	}
 	//获取封面链接
-	coverUrl := fmt.Sprintf("http://%s:%s/cover/%s.jpg", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
+	coverUrl := fmt.Sprintf("http://%s:%s/cover/%s", config.MinioSetting.Host, config.MinioSetting.Port, videoName)
 	//coverUrl := "https://images.ltd7.ltd/img/2022-summary/summer.jpg"
 	//创建video并将视频和封面链接存入数据库
 	video := map[string]interface{}{
