@@ -32,5 +32,4 @@ func InitDB() {
 	log.Info("Gorm init successfully")
 	sqlDB.SetMaxIdleConns(config.DatabaseSetting.MaxConn)
 	sqlDB.SetMaxOpenConns(config.DatabaseSetting.MaxOpen)
-
 }

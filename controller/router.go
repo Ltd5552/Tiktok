@@ -14,7 +14,7 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 
 	// 设置文件最大容量
-	r.MaxMultipartMemory = 2 << 26
+	r.MaxMultipartMemory = 2 << 28
 
 	// 初始化trace
 	trace.Set(r)

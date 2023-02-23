@@ -228,7 +228,6 @@ func New(writer io.Writer, level Level) *Logger {
 	}
 	opts = append(opts, zapcore.AddSync(os.Stdout))
 	syncWriter := zapcore.NewMultiWriteSyncer(opts...)
-	//syncWriter := zapcore.NewMultiWriteSyncer()
 
 	// 自定义时间输出格式
 	loc, _ := time.LoadLocation(timeLoc)

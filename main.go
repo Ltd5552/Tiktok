@@ -29,7 +29,7 @@ func main() {
 		Handler:        controller.InitRouter(),
 		ReadTimeout:    config.ServerSetting.ReadTimeout,
 		WriteTimeout:   config.ServerSetting.WriteTimeout,
-		MaxHeaderBytes: 1 << 20,
+		MaxHeaderBytes: 1 << 25,
 	}
 
 	err := s.ListenAndServe()
