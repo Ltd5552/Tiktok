@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"Tiktok/config"
-	"Tiktok/pkg/log"
 	"errors"
 	"strconv"
 	"time"
@@ -50,10 +49,8 @@ func ParseToken(tokenstr string) (int, error) {
 		ve, ok := err.(*jwt.ValidationError)
 		if ok {
 			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				log.Error("not a true token")
 				return 0, errors.New("not a true token")
 			} else {
-				log.Error("token error")
 				return 0, errors.New("token error")
 			}
 		}
@@ -66,7 +63,6 @@ func ParseToken(tokenstr string) (int, error) {
 		}
 		return id, nil
 	}
-	log.Error("token parse error")
 	return 0, errors.New("couldn't parse the token")
 }
 
