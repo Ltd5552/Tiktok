@@ -58,7 +58,8 @@ func GetFeed(c *gin.Context) {
 			c.JSON(http.StatusOK, FeedResponse{
 				Response: Response{StatusCode: 1, StatusMsg: "time to int error"},
 			})
-		}	
+			return
+		}
 	}
 	var videoList []Video
 	var userID int

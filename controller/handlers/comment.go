@@ -67,12 +67,14 @@ func CommentAction(c *gin.Context) {
 			c.JSON(http.StatusOK, CommentResponse{
 				Response: Response{StatusCode: 1, StatusMsg: err.Error()},
 			})
+			return
 		}
 		newComment, err := CommentConv(comment)
 		if err != nil {
 			c.JSON(http.StatusOK, CommentResponse{
 				Response: Response{StatusCode: 1, StatusMsg: err.Error()},
 			})
+			return
 		}
 		c.JSON(http.StatusOK, CommentResponse{
 			Response: Response{StatusCode: 0},
@@ -93,12 +95,14 @@ func CommentAction(c *gin.Context) {
 			c.JSON(http.StatusOK, CommentResponse{
 				Response: Response{StatusCode: 1, StatusMsg: err.Error()},
 			})
+			return
 		}
 		newComment, err := CommentConv(comment)
 		if err != nil {
 			c.JSON(http.StatusOK, CommentResponse{
 				Response: Response{StatusCode: 1, StatusMsg: err.Error()},
 			})
+			return
 		}
 		c.JSON(http.StatusOK, CommentResponse{
 			Response: Response{StatusCode: 0},
@@ -116,6 +120,7 @@ func GetCommentList(c *gin.Context) {
 		c.JSON(http.StatusOK, CommentListResponse{
 			Response: Response{StatusCode: 1, StatusMsg: "Get comment_list error"},
 		})
+		return
 	}
 	var comments []Comment
 	for _, comment := range commentList {
