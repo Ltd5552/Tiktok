@@ -7,6 +7,7 @@ import (
 	"Tiktok/pkg/log"
 	"Tiktok/pkg/minio"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -24,6 +25,7 @@ func main() {
 			log.Error("log sync err", zap.Error(err))
 		}
 	}()
+	gin.SetMode("release")
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", config.ServerSetting.Port),
 		Handler:        controller.InitRouter(),

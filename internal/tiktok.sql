@@ -40,3 +40,10 @@ CREATE TABLE IF NOT EXISTS favorites(
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (video_id) REFERENCES videos(id)
 )ENGINE=InnoDB  DEFAULT CHARSET=UTF8MB4;
+
+
+ALTER table users ADD INDEX name(name);
+ALTER table users ADD INDEX password(password);
+ALTER table videos ADD INDEX author_id(author_id);
+ALTER table videos ADD INDEX created_at(created_at);
+ALTER table comments ADD INDEX video_id(video_id);

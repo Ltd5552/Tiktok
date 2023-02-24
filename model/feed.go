@@ -25,11 +25,13 @@ type Favorite struct {
 
 // JudgeFavorite 判断用户是否给该视频点赞
 func JudgeFavorite(userId int, videoId uint) bool {
-	var tmp Favorite
-	if err := DB.Where("user_id = ?", userId).Where("video_id = ?", videoId).Find(&tmp).Error; err == gorm.ErrRecordNotFound {
-		return false
-	} else if err != nil {
+	var favorite Favorite
+	err := DB.Where("user_id = ? AND video_id = ?", userId, videoId).Find(&favorite).Error
+	if err != nil {
 		log.Error("select Favorite error" + err.Error())
+		return false
+	}
+	if favorite.VideoId == 0 {
 		return false
 	}
 	return true
